@@ -4,14 +4,6 @@ import { getProductById } from '../../services/product'
 import { useQuery } from '@tanstack/react-query'
 import { Spin } from 'antd'
 
-const contentStyle = {
-  padding: 50,
-  background: 'rgba(0, 0, 0, 0.05)',
-  borderRadius: 4,
-}
-
-const content = <div style={contentStyle} />
-
 const ProductDetail = () => {
   const { id } = useParams()
   const [product, setProduct] = useState({})
@@ -30,10 +22,8 @@ const ProductDetail = () => {
 
   if (isLoading)
     return (
-      <div className="text-center">
-        <Spin tip="Loading" size="large">
-          {content}
-        </Spin>
+      <div className="text-center py-8">
+        <Spin size="large" />
       </div>
     )
 

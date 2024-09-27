@@ -4,14 +4,6 @@ import { getAllProducts } from '../../services/product'
 import { Spin } from 'antd'
 import ProductCard from '../../components/(client)/ProductCard'
 
-const contentStyle = {
-  padding: 50,
-  background: 'rgba(0, 0, 0, 0.05)',
-  borderRadius: 4,
-}
-
-const content = <div style={contentStyle} />
-
 const Shop = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['products'],
@@ -167,9 +159,7 @@ const Shop = () => {
         </div>
         {isLoading && (
           <div className="text-center">
-            <Spin tip="Loading" size="large">
-              {content}
-            </Spin>
+            <Spin size="large" />
           </div>
         )}
         <div className="mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4">

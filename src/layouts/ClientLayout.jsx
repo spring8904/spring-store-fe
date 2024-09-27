@@ -6,13 +6,13 @@ const { Content } = Layout
 
 const ClientLayout = () => {
   return (
-    <Layout>
+    <div className="flex flex-col min-h-0 flex-auto">
       <Header />
       <Content>
         <Outlet />
       </Content>
       <Footer />
-    </Layout>
+    </div>
   )
 }
 export default ClientLayout

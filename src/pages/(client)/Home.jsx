@@ -4,14 +4,6 @@ import HeroSection from '../../components/(client)/HeroSection'
 import ProductCard from '../../components/(client)/ProductCard'
 import { getAllProducts } from '../../services/product'
 
-const contentStyle = {
-  padding: 50,
-  background: 'rgba(0, 0, 0, 0.05)',
-  borderRadius: 4,
-}
-
-const content = <div style={contentStyle} />
-
 const Home = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['products'],
@@ -37,9 +29,7 @@ const Home = () => {
         </p>
         {isLoading && (
           <div className="text-center">
-            <Spin tip="Loading" size="large">
-              {content}
-            </Spin>
+            <Spin size="large" />
           </div>
         )}
         <div className="mx-auto max-w-screen-xl px-4 2xl:px-0">

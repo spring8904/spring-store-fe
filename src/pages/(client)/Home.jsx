@@ -10,10 +10,7 @@ const Home = () => {
     queryKey: ['products'],
     queryFn: async () => {
       const { data } = await getAllProducts()
-      return data.data.map((product) => ({
-        ...product,
-        key: product.id,
-      }))
+      return data.data
     },
   })
 

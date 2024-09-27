@@ -32,6 +32,14 @@ const Header = () => {
                   Shop
                 </Link>
               </li>
+              <li className="shrink-0">
+                <Link
+                  to="/dashboard"
+                  className="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                >
+                  Dashboard
+                </Link>
+              </li>
             </ul>
           </div>
 

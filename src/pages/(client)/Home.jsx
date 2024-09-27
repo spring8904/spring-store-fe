@@ -3,6 +3,7 @@ import { Spin } from 'antd'
 import HeroSection from '../../components/(client)/HeroSection'
 import ProductCard from '../../components/(client)/ProductCard'
 import { getAllProducts } from '../../services/product'
+import { useEffect } from 'react'
 
 const Home = () => {
   const { data, isLoading, isError, error } = useQuery({
@@ -15,6 +16,10 @@ const Home = () => {
       }))
     },
   })
+
+  useEffect(() => {
+    document.title = 'Home'
+  }, [])
 
   return (
     <>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { getAllProducts } from '../../services/product'
 import { Spin } from 'antd'
 import ProductCard from '../../components/(client)/ProductCard'
+import { useEffect } from 'react'
 
 const Shop = () => {
   const { data, isLoading, isError, error } = useQuery({
@@ -16,6 +17,11 @@ const Shop = () => {
       }))
     },
   })
+
+  useEffect(() => {
+    document.title = 'Shop'
+  }, [])
+
   return (
     <section className="bg-gray-50 py-8 antialiased dark:bg-gray-900 md:py-12">
       <div className="mx-auto max-w-screen-xl px-4 2xl:px-0">

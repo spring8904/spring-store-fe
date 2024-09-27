@@ -17,7 +17,10 @@ const ProductDetail = () => {
   })
 
   useEffect(() => {
-    if (data) setProduct(data)
+    if (data) {
+      setProduct(data)
+      document.title = data.title
+    } else document.title = 'Product Detail'
   }, [data])
 
   if (isLoading)

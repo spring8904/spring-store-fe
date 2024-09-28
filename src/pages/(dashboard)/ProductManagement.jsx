@@ -10,6 +10,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Dropdown, Image, Modal, Rate, Space, Spin, Table } from 'antd'
 import { useEffect, useState } from 'react'
 import ProductCreationDrawer from '../../components/(dashboard)/productCreationDrawer'
+import ProductUpdateDrawer from '../../components/(dashboard)/ProductUpdateDrawer'
 import { deleteProduct, getAllProducts } from '../../services/product'
 const { confirm } = Modal
 
@@ -41,6 +42,13 @@ const ProductManagement = () => {
   const [openProductCreationDrawer, setOpenProductCreationDrawer] =
     useState(false)
 
+  const [openProductUpdateDrawer, setOpenProductUpdateDrawer] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState({})
+
+  useEffect(() => {
+    document.title = 'Product Management'
+  }, [])
+
   const columns = [
     {
       title: 'PRODUCT',
@@ -68,8 +76,8 @@ const ProductManagement = () => {
       },
     },
     {
-      render: (_, { _id }) => (
-        <Dropdown menu={{ items: getProductActionItems(_id) }}>
+      render: (_, record) => (
+        <Dropdown menu={{ items: getProductActionItems(record) }}>
           <a onClick={(e) => e.preventDefault()}>
             <Space>
               Action
@@ -81,11 +89,18 @@ const ProductManagement = () => {
     },
   ]
 
-  const getProductActionItems = (id) => [
+  const getProductActionItems = (product) => [
     {
       key: 'edit',
       label: (
-        <Button block type="primary" icon={<EditOutlined />} onClick={() => {}}>
+        <Button
+          block
+          type="primary"
+          icon={<EditOutlined />}
+          onClick={() => {
+            showProductUpdateDrawer(product)
+          }}
+        >
           Edit
         </Button>
       ),
@@ -106,7 +121,7 @@ const ProductManagement = () => {
           color="danger"
           variant="outlined"
           icon={<DeleteOutlined />}
-          onClick={() => showDeleteConfirm(id)}
+          onClick={() => showDeleteConfirm(product._id)}
         >
           Delete
         </Button>
@@ -142,9 +157,12 @@ const ProductManagement = () => {
 
   const closeProductCreationDrawer = () => setOpenProductCreationDrawer(false)
 
-  useEffect(() => {
-    document.title = 'Product Management'
-  }, [])
+  const showProductUpdateDrawer = (product) => {
+    setOpenProductUpdateDrawer(true)
+    setSelectedProduct(product)
+  }
+
+  const closeProductUpdateDrawer = () => setOpenProductUpdateDrawer(false)
 
   if (isLoading)
     return (
@@ -183,6 +201,11 @@ const ProductManagement = () => {
         <ProductCreationDrawer
           open={openProductCreationDrawer}
           onCloseDrawer={closeProductCreationDrawer}
+        />
+        <ProductUpdateDrawer
+          open={openProductUpdateDrawer}
+          onClose={closeProductUpdateDrawer}
+          product={selectedProduct}
         />
       </div>
     </div>

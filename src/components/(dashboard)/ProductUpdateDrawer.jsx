@@ -2,34 +2,33 @@ import { PlusOutlined } from '@ant-design/icons'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button, Drawer, Form, Input, InputNumber, message, Upload } from 'antd'
 import PropTypes from 'prop-types'
-import { useState } from 'react'
-import { createProduct } from '../../services/product'
+import { useEffect, useState } from 'react'
+import { updateProduct } from '../../services/product'
 const { TextArea } = Input
 
-const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
+const ProductUpdateDrawer = ({ open, onClose, product }) => {
   const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
   const [form] = Form.useForm()
 
+  useEffect(() => {
+    form.setFieldsValue(product)
+    setImageUrl(product.image)
+  }, [form, product])
+
   const { mutate, isPending } = useMutation({
-    mutationFn: async (product) => {
-      await createProduct(product)
+    mutationFn: async (values) => {
+      await updateProduct(product?._id, values)
     },
     onSuccess: () => {
-      onClose()
-      message.success('Product created successfully')
+      message.success('Product updated successfully')
       queryClient.invalidateQueries({
         queryKey: ['products'],
       })
+      onClose()
     },
   })
-
-  const onClose = () => {
-    onCloseDrawer()
-    form.resetFields()
-    setImageUrl('')
-  }
 
   const normFile = (e) => {
     if (Array.isArray(e)) {
@@ -49,17 +48,12 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
       setImageUrl(info.file.response.secure_url)
     }
   }
-
   const onFinish = (values) => {
     if (loading) {
       message.warning('Image is uploading, please wait')
       return
     }
 
-    if (!imageUrl) {
-      message.error('Please upload an image')
-      return
-    }
     mutate({ ...values, image: imageUrl })
   }
 
@@ -77,18 +71,22 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
 
   return (
     <Drawer
-      title="Create a new product"
-      onClose={onClose}
+      title="Update product"
+      onClose={() => {
+        onClose()
+        form.resetFields()
+      }}
       open={open}
       destroyOnClose={true}
     >
       <Form
-        name="createProduct"
+        name="updateProduct"
         form={form}
         onFinish={onFinish}
         disabled={isPending}
         layout="vertical"
         requiredMark="optional"
+        initialValues={product}
       >
         <Form.Item
           label="Product Image"
@@ -104,7 +102,9 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
             }}
             beforeUpload={beforeUpload}
             onChange={handleChange}
+            className="w-full"
             maxCount={1}
+            showUploadList={imageUrl || loading}
           >
             <button
               style={{
@@ -157,7 +157,7 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
         </Form.Item>
 
         <Form.Item
-          label="Description:"
+          label="Description"
           name="description"
           rules={[
             {
@@ -179,9 +179,16 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
   )
 }
 
-ProductCreationDrawer.propTypes = {
+ProductUpdateDrawer.propTypes = {
   open: PropTypes.bool.isRequired,
-  onCloseDrawer: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  product: PropTypes.shape({
+    _id: PropTypes.string,
+    image: PropTypes.string,
+    title: PropTypes.string,
+    price: PropTypes.number,
+    description: PropTypes.string,
+  }),
 }
 
-export default ProductCreationDrawer
+export default ProductUpdateDrawer

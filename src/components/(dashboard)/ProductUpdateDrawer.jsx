@@ -2,20 +2,25 @@ import { PlusOutlined } from '@ant-design/icons'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button, Drawer, Form, Input, InputNumber, message, Upload } from 'antd'
 import PropTypes from 'prop-types'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { updateProduct } from '../../services/product'
 const { TextArea } = Input
 
 const ProductUpdateDrawer = ({ open, onClose, product }) => {
   const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
-  const [imageUrl, setImageUrl] = useState('')
+  const [thumbnail, setThumbnail] = useState('')
+  const [images, setImages] = useState([])
   const [form] = Form.useForm()
 
   useEffect(() => {
+    if (!open) return
     form.setFieldsValue(product)
-    setImageUrl(product.image)
-  }, [form, product])
+    setThumbnail(product.thumbnail)
+    setImages(product.images)
+  }, [form, product, open])
+
+  console.log(images)
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (values) => {
@@ -37,7 +42,7 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
     return e?.fileList
   }
 
-  const handleChange = (info) => {
+  const handleUploadThumbChange = (info) => {
     if (info.file.status === 'uploading') {
       setLoading(true)
       return
@@ -45,16 +50,39 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
 
     if (info.file.status === 'done') {
       setLoading(false)
-      setImageUrl(info.file.response.secure_url)
+      setThumbnail(info.file.response.secure_url)
     }
   }
+
+  const handleUploadImagesChange = (info) => {
+    console.log(info)
+    if (info.file.status === 'uploading') {
+      setLoading(true)
+      return
+    }
+
+    if (info.file.status === 'done') {
+      setLoading(false)
+      setImages(info.fileList.map((file) => file.response.secure_url))
+    }
+
+    if (info.file.status === 'removed') {
+      setImages(images.filter((url) => url !== info.file.url))
+    }
+  }
+
   const onFinish = (values) => {
     if (loading) {
       message.warning('Image is uploading, please wait')
       return
     }
 
-    mutate({ ...values, image: imageUrl })
+    if (!thumbnail) {
+      message.error('Please upload an image')
+      return
+    }
+
+    mutate({ ...values, thumbnail, images })
   }
 
   const beforeUpload = (file) => {
@@ -77,7 +105,8 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
         form.resetFields()
       }}
       open={open}
-      destroyOnClose={true}
+      destroyOnClose
+      width={388}
     >
       <Form
         name="updateProduct"
@@ -89,7 +118,7 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
         initialValues={product}
       >
         <Form.Item
-          label="Product Image"
+          label="Product Image:"
           valuePropName="fileList"
           getValueFromEvent={normFile}
           required
@@ -101,26 +130,13 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
               upload_preset: 'web209',
             }}
             beforeUpload={beforeUpload}
-            onChange={handleChange}
-            className="w-full"
+            onChange={handleUploadThumbChange}
             maxCount={1}
-            showUploadList={imageUrl || loading}
+            defaultFileList={[{ url: product.thumbnail }]}
           >
-            <button
-              style={{
-                border: 0,
-                background: 'none',
-              }}
-              type="button"
-            >
+            <button type="button">
               <PlusOutlined />
-              <div
-                style={{
-                  marginTop: 8,
-                }}
-              >
-                Upload
-              </div>
+              <div>Upload</div>
             </button>
           </Upload>
         </Form.Item>
@@ -153,7 +169,7 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
             },
           ]}
         >
-          <InputNumber style={{ width: '100%' }} />
+          <InputNumber className="w-full" />
         </Form.Item>
 
         <Form.Item
@@ -167,6 +183,32 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
           ]}
         >
           <TextArea rows={4} />
+        </Form.Item>
+
+        <Form.Item
+          label="Product Images:"
+          valuePropName="fileList"
+          getValueFromEvent={normFile}
+        >
+          <Upload
+            action="https://api.cloudinary.com/v1_1/spring8904/image/upload"
+            listType="picture-card"
+            data={{
+              upload_preset: 'web209',
+            }}
+            beforeUpload={beforeUpload}
+            onChange={handleUploadImagesChange}
+            defaultFileList={product?.images?.map((url, i) => ({
+              uid: i,
+              url,
+            }))}
+            multiple
+          >
+            <button type="button">
+              <PlusOutlined />
+              <div>Upload</div>
+            </button>
+          </Upload>
         </Form.Item>
 
         <Form.Item>
@@ -184,11 +226,12 @@ ProductUpdateDrawer.propTypes = {
   onClose: PropTypes.func.isRequired,
   product: PropTypes.shape({
     _id: PropTypes.string,
-    image: PropTypes.string,
     title: PropTypes.string,
     price: PropTypes.number,
     description: PropTypes.string,
+    thumbnail: PropTypes.string,
+    images: PropTypes.arrayOf(PropTypes.string),
   }),
 }
 
-export default ProductUpdateDrawer
+export default memo(ProductUpdateDrawer)

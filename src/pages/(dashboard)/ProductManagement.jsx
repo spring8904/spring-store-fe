@@ -7,9 +7,18 @@ import {
   PlusOutlined,
 } from '@ant-design/icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Button, Dropdown, Image, Modal, Rate, Space, Spin, Table } from 'antd'
-import { useEffect, useState } from 'react'
-import ProductCreationDrawer from '../../components/(dashboard)/productCreationDrawer'
+import {
+  Button,
+  Dropdown,
+  Image,
+  message,
+  Modal,
+  Rate,
+  Space,
+  Table,
+} from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import ProductCreationDrawer from '../../components/(dashboard)/ProductCreationDrawer'
 import ProductUpdateDrawer from '../../components/(dashboard)/ProductUpdateDrawer'
 import { deleteProduct, getAllProducts } from '../../services/product'
 const { confirm } = Modal
@@ -29,21 +38,23 @@ const ProductManagement = () => {
   const queryClient = useQueryClient()
 
   const { mutate } = useMutation({
-    mutationFn: async (id) => {
-      await deleteProduct(id)
-    },
+    mutationFn: async (id) => await deleteProduct(id),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['products'],
       })
+      message.success('Product deleted successfully!')
+    },
+    onError: (error) => {
+      message.error('Failed to delete the product: ' + error.message)
+      console.error(error)
     },
   })
 
-  const [openProductCreationDrawer, setOpenProductCreationDrawer] =
-    useState(false)
-
-  const [openProductUpdateDrawer, setOpenProductUpdateDrawer] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState({})
+  const [openCreationDrawer, setOpenCreationDrawer] = useState(false)
+  const [openUpdateDrawer, setOpenUpdateDrawer] = useState(false)
+  const [updatedSelection, setUpdatedSelection] = useState({})
+  const [selectedRows, setSelectedRows] = useState([])
 
   useEffect(() => {
     document.title = 'Product Management'
@@ -53,9 +64,9 @@ const ProductManagement = () => {
     {
       title: 'PRODUCT',
       dataIndex: 'title',
-      render: (title, { image }) => (
-        <div className="flex items-center gap-2">
-          <Image width={32} src={image} /> {title}
+      render: (title, { thumbnail }) => (
+        <div className="flex items-center gap-4">
+          <Image width={64} src={thumbnail} /> {title}
         </div>
       ),
     },
@@ -70,7 +81,7 @@ const ProductManagement = () => {
         const rate = Number((Math.random() * (5 - 1) + 1).toFixed(1))
         return (
           <div className="flex items-center gap-1">
-            <Rate allowHalf disabled defaultValue={rate} /> {rate}
+            <Rate allowHalf disabled value={rate} /> {rate}
           </div>
         )
       },
@@ -98,7 +109,7 @@ const ProductManagement = () => {
           type="primary"
           icon={<EditOutlined />}
           onClick={() => {
-            showProductUpdateDrawer(product)
+            showUpdateDrawer(product)
           }}
         >
           Edit
@@ -121,7 +132,7 @@ const ProductManagement = () => {
           color="danger"
           variant="outlined"
           icon={<DeleteOutlined />}
-          onClick={() => showDeleteConfirm(product._id)}
+          onClick={() => showDeleteConfirm(product)}
         >
           Delete
         </Button>
@@ -129,47 +140,67 @@ const ProductManagement = () => {
     },
   ]
 
+  const showDeleteConfirm = ({ _id, title }) => {
+    confirm({
+      title: 'Are you sure?',
+      content: `Are you sure you want to delete the "${title}" product?`,
+      icon: <ExclamationCircleFilled />,
+      okText: 'Delete',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        mutate(_id)
+      },
+    })
+  }
+
+  const showDeleteMultipleConfirm = () => {
+    if (!selectedRows.length) return
+
+    if (selectedRows.length === 1) {
+      showDeleteConfirm(selectedRows[0])
+      return
+    }
+
+    confirm({
+      title: 'Are you sure?',
+      content: `Are you sure you want to delete ${selectedRows.length} products?`,
+      icon: <ExclamationCircleFilled />,
+      okText: 'Delete',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        selectedRows.forEach((product) => {
+          mutate(product._id)
+        })
+      },
+    })
+  }
+
   const items = [
     {
-      key: 'deleteAll',
+      key: 'deleteMultipleProducts',
       label: (
-        <Button type="link" danger>
-          Delete all
+        <Button type="link" danger onClick={showDeleteMultipleConfirm}>
+          Delete
         </Button>
       ),
     },
   ]
 
-  const showDeleteConfirm = (id) => {
-    confirm({
-      title: 'Are you sure delete this product?',
-      icon: <ExclamationCircleFilled />,
-      okText: 'Yes',
-      okType: 'danger',
-      cancelText: 'No',
-      onOk() {
-        mutate(id)
-      },
-    })
+  const showCreationDrawer = () => setOpenCreationDrawer(true)
+
+  const closeCreationDrawer = useCallback(
+    () => setOpenCreationDrawer(false),
+    [],
+  )
+
+  const showUpdateDrawer = (product) => {
+    setOpenUpdateDrawer(true)
+    setUpdatedSelection(product)
   }
 
-  const showProductCreationDrawer = () => setOpenProductCreationDrawer(true)
-
-  const closeProductCreationDrawer = () => setOpenProductCreationDrawer(false)
-
-  const showProductUpdateDrawer = (product) => {
-    setOpenProductUpdateDrawer(true)
-    setSelectedProduct(product)
-  }
-
-  const closeProductUpdateDrawer = () => setOpenProductUpdateDrawer(false)
-
-  if (isLoading)
-    return (
-      <div className="text-center">
-        <Spin size="large" />
-      </div>
-    )
+  const closeUpdateDrawer = useCallback(() => setOpenUpdateDrawer(false), [])
 
   if (isError) return <div>Error: {error.message}</div>
 
@@ -180,7 +211,7 @@ const ProductManagement = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={showProductCreationDrawer}
+            onClick={showCreationDrawer}
           >
             Add product
           </Button>
@@ -194,18 +225,20 @@ const ProductManagement = () => {
           rowKey={(record) => record._id}
           rowSelection={{
             type: 'checkbox',
+            onChange: (_, selectedRows) => setSelectedRows(selectedRows),
           }}
           columns={columns}
           dataSource={data}
+          loading={isLoading}
         />
         <ProductCreationDrawer
-          open={openProductCreationDrawer}
-          onCloseDrawer={closeProductCreationDrawer}
+          open={openCreationDrawer}
+          onClose={closeCreationDrawer}
         />
         <ProductUpdateDrawer
-          open={openProductUpdateDrawer}
-          onClose={closeProductUpdateDrawer}
-          product={selectedProduct}
+          open={openUpdateDrawer}
+          onClose={closeUpdateDrawer}
+          product={updatedSelection}
         />
       </div>
     </div>

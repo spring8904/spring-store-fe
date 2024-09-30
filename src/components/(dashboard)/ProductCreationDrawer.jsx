@@ -2,22 +2,21 @@ import { PlusOutlined } from '@ant-design/icons'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button, Drawer, Form, Input, InputNumber, message, Upload } from 'antd'
 import PropTypes from 'prop-types'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { createProduct } from '../../services/product'
 const { TextArea } = Input
 
-const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
+const ProductCreationDrawer = ({ open, onClose }) => {
   const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
-  const [imageUrl, setImageUrl] = useState('')
+  const [thumbnail, setThumbnail] = useState('')
+  const [images, setImages] = useState([])
   const [form] = Form.useForm()
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (product) => {
-      await createProduct(product)
-    },
+    mutationFn: async (product) => await createProduct(product),
     onSuccess: () => {
-      onClose()
+      onCloseDrawer()
       message.success('Product created successfully')
       queryClient.invalidateQueries({
         queryKey: ['products'],
@@ -25,10 +24,10 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
     },
   })
 
-  const onClose = () => {
-    onCloseDrawer()
+  const onCloseDrawer = () => {
+    onClose()
     form.resetFields()
-    setImageUrl('')
+    setThumbnail('')
   }
 
   const normFile = (e) => {
@@ -38,7 +37,7 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
     return e?.fileList
   }
 
-  const handleChange = (info) => {
+  const handleUploadThumbChange = (info) => {
     if (info.file.status === 'uploading') {
       setLoading(true)
       return
@@ -46,7 +45,19 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
 
     if (info.file.status === 'done') {
       setLoading(false)
-      setImageUrl(info.file.response.secure_url)
+      setThumbnail(info.file.response.secure_url)
+    }
+  }
+
+  const handleUploadImagesChange = (info) => {
+    if (info.file.status === 'uploading') {
+      setLoading(true)
+      return
+    }
+
+    if (info.file.status === 'done') {
+      setLoading(false)
+      setImages(info.fileList.map((file) => file.response.secure_url))
     }
   }
 
@@ -56,11 +67,12 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
       return
     }
 
-    if (!imageUrl) {
+    if (!thumbnail) {
       message.error('Please upload an image')
       return
     }
-    mutate({ ...values, image: imageUrl })
+
+    mutate({ ...values, thumbnail, images })
   }
 
   const beforeUpload = (file) => {
@@ -78,9 +90,10 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
   return (
     <Drawer
       title="Create a new product"
-      onClose={onClose}
+      onClose={onCloseDrawer}
       open={open}
-      destroyOnClose={true}
+      destroyOnClose
+      width={388}
     >
       <Form
         name="createProduct"
@@ -91,7 +104,7 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
         requiredMark="optional"
       >
         <Form.Item
-          label="Product Image"
+          label="Product Thumbnail:"
           valuePropName="fileList"
           getValueFromEvent={normFile}
           required
@@ -103,24 +116,12 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
               upload_preset: 'web209',
             }}
             beforeUpload={beforeUpload}
-            onChange={handleChange}
+            onChange={handleUploadThumbChange}
             maxCount={1}
           >
-            <button
-              style={{
-                border: 0,
-                background: 'none',
-              }}
-              type="button"
-            >
+            <button type="button">
               <PlusOutlined />
-              <div
-                style={{
-                  marginTop: 8,
-                }}
-              >
-                Upload
-              </div>
+              <div>Upload</div>
             </button>
           </Upload>
         </Form.Item>
@@ -153,7 +154,7 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
             },
           ]}
         >
-          <InputNumber style={{ width: '100%' }} />
+          <InputNumber className="w-full" />
         </Form.Item>
 
         <Form.Item
@@ -169,6 +170,28 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
           <TextArea rows={4} />
         </Form.Item>
 
+        <Form.Item
+          label="Product Images:"
+          valuePropName="fileList"
+          getValueFromEvent={normFile}
+        >
+          <Upload
+            action="https://api.cloudinary.com/v1_1/spring8904/image/upload"
+            listType="picture-card"
+            data={{
+              upload_preset: 'web209',
+            }}
+            beforeUpload={beforeUpload}
+            onChange={handleUploadImagesChange}
+            multiple
+          >
+            <button type="button">
+              <PlusOutlined />
+              <div>Upload</div>
+            </button>
+          </Upload>
+        </Form.Item>
+
         <Form.Item>
           <Button type="primary" htmlType="submit">
             Submit
@@ -181,7 +204,7 @@ const ProductCreationDrawer = ({ open, onCloseDrawer }) => {
 
 ProductCreationDrawer.propTypes = {
   open: PropTypes.bool.isRequired,
-  onCloseDrawer: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 }
 
-export default ProductCreationDrawer
+export default memo(ProductCreationDrawer)

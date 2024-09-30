@@ -4,14 +4,15 @@ import { Button, Drawer, Form, Input, InputNumber, message, Upload } from 'antd'
 import PropTypes from 'prop-types'
 import { memo, useState } from 'react'
 import { createProduct } from '../../services/product'
+import { deleteImagesCloudinary } from '../../services/image'
 const { TextArea } = Input
 
 const ProductCreationDrawer = ({ open, onClose }) => {
   const queryClient = useQueryClient()
-  const [loading, setLoading] = useState(false)
+  const [form] = Form.useForm()
   const [thumbnail, setThumbnail] = useState('')
   const [images, setImages] = useState([])
-  const [form] = Form.useForm()
+  const [loading, setLoading] = useState(false)
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (product) => await createProduct(product),
@@ -28,6 +29,7 @@ const ProductCreationDrawer = ({ open, onClose }) => {
     onClose()
     form.resetFields()
     setThumbnail('')
+    setImages([])
   }
 
   const normFile = (e) => {
@@ -37,27 +39,33 @@ const ProductCreationDrawer = ({ open, onClose }) => {
     return e?.fileList
   }
 
-  const handleUploadThumbChange = (info) => {
-    if (info.file.status === 'uploading') {
+  const handleUploadThumbChange = ({ file }) => {
+    if (file.status === 'uploading') {
       setLoading(true)
       return
     }
 
-    if (info.file.status === 'done') {
+    if (file.status === 'done') {
+      if (thumbnail) deleteImagesCloudinary([thumbnail])
       setLoading(false)
-      setThumbnail(info.file.response.secure_url)
+      setThumbnail(file.response.secure_url)
     }
   }
 
-  const handleUploadImagesChange = (info) => {
-    if (info.file.status === 'uploading') {
+  const handleUploadImagesChange = ({ file, fileList }) => {
+    if (file.status === 'uploading') {
       setLoading(true)
       return
     }
 
-    if (info.file.status === 'done') {
+    if (file.status === 'done') {
       setLoading(false)
-      setImages(info.fileList.map((file) => file.response.secure_url))
+      setImages(fileList.map((file) => file.response?.secure_url))
+    }
+
+    if (file.status === 'removed') {
+      deleteImagesCloudinary([file.response?.secure_url])
+      setImages(fileList.map((file) => file.response?.secure_url))
     }
   }
 
@@ -90,7 +98,17 @@ const ProductCreationDrawer = ({ open, onClose }) => {
   return (
     <Drawer
       title="Create a new product"
-      onClose={onCloseDrawer}
+      onClose={() => {
+        if (thumbnail) {
+          deleteImagesCloudinary([thumbnail])
+        }
+
+        if (images.length) {
+          deleteImagesCloudinary(images)
+        }
+
+        onCloseDrawer()
+      }}
       open={open}
       destroyOnClose
       width={388}
@@ -110,10 +128,10 @@ const ProductCreationDrawer = ({ open, onClose }) => {
           required
         >
           <Upload
-            action="https://api.cloudinary.com/v1_1/spring8904/image/upload"
+            action={import.meta.env.VITE_CLOUDINARY_UPLOAD_URL}
             listType="picture-card"
             data={{
-              upload_preset: 'web209',
+              upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
             }}
             beforeUpload={beforeUpload}
             onChange={handleUploadThumbChange}
@@ -176,10 +194,10 @@ const ProductCreationDrawer = ({ open, onClose }) => {
           getValueFromEvent={normFile}
         >
           <Upload
-            action="https://api.cloudinary.com/v1_1/spring8904/image/upload"
+            action={import.meta.env.VITE_CLOUDINARY_UPLOAD_URL}
             listType="picture-card"
             data={{
-              upload_preset: 'web209',
+              upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
             }}
             beforeUpload={beforeUpload}
             onChange={handleUploadImagesChange}

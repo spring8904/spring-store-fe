@@ -4,14 +4,17 @@ import { Button, Drawer, Form, Input, InputNumber, message, Upload } from 'antd'
 import PropTypes from 'prop-types'
 import { memo, useEffect, useState } from 'react'
 import { updateProduct } from '../../services/product'
+import { deleteImagesCloudinary } from '../../services/image'
 const { TextArea } = Input
 
 const ProductUpdateDrawer = ({ open, onClose, product }) => {
   const queryClient = useQueryClient()
-  const [loading, setLoading] = useState(false)
-  const [thumbnail, setThumbnail] = useState('')
-  const [images, setImages] = useState([])
   const [form] = Form.useForm()
+  const [thumbnail, setThumbnail] = useState('')
+  const [newThumbnail, setNewThumbnail] = useState('')
+  const [images, setImages] = useState([])
+  const [newImages, setNewImages] = useState([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -20,13 +23,14 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
     setImages(product.images)
   }, [form, product, open])
 
-  console.log(images)
-
   const { mutate, isPending } = useMutation({
-    mutationFn: async (values) => {
-      await updateProduct(product?._id, values)
-    },
+    mutationFn: async (values) => await updateProduct(product?._id, values),
     onSuccess: () => {
+      if (newThumbnail) deleteImagesCloudinary([thumbnail])
+
+      const toBeDeleted = images.filter((url) => !newImages.includes(url))
+
+      if (toBeDeleted.length) deleteImagesCloudinary(toBeDeleted)
       message.success('Product updated successfully')
       queryClient.invalidateQueries({
         queryKey: ['products'],
@@ -42,32 +46,42 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
     return e?.fileList
   }
 
-  const handleUploadThumbChange = (info) => {
-    if (info.file.status === 'uploading') {
+  const handleUploadThumbChange = ({ file }) => {
+    if (file.status === 'uploading') {
       setLoading(true)
       return
     }
 
-    if (info.file.status === 'done') {
+    if (file.status === 'done') {
       setLoading(false)
-      setThumbnail(info.file.response.secure_url)
+      setNewThumbnail(file.response.secure_url)
     }
   }
 
-  const handleUploadImagesChange = (info) => {
-    console.log(info)
-    if (info.file.status === 'uploading') {
+  const handleUploadImagesChange = ({ file, fileList }) => {
+    if (file.status === 'uploading') {
       setLoading(true)
       return
     }
 
-    if (info.file.status === 'done') {
+    if (file.status === 'done') {
       setLoading(false)
-      setImages(info.fileList.map((file) => file.response.secure_url))
+      setNewImages(
+        fileList.map((file) => {
+          if (file.url) return file.url
+          return file.response?.secure_url
+        }),
+      )
     }
 
-    if (info.file.status === 'removed') {
-      setImages(images.filter((url) => url !== info.file.url))
+    if (file.status === 'removed') {
+      deleteImagesCloudinary([file.url])
+      setNewImages(
+        fileList.map((file) => {
+          if (file.url) return file.url
+          return file.response?.secure_url
+        }),
+      )
     }
   }
 
@@ -77,12 +91,12 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
       return
     }
 
-    if (!thumbnail) {
+    if (!newThumbnail) {
       message.error('Please upload an image')
       return
     }
 
-    mutate({ ...values, thumbnail, images })
+    mutate({ ...values, thumbnail: newThumbnail, images: newImages })
   }
 
   const beforeUpload = (file) => {
@@ -97,13 +111,25 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
     return isJpgOrPng && isLt2M
   }
 
+  const onCloseDrawer = () => {
+    if (newThumbnail) {
+      deleteImagesCloudinary([newThumbnail])
+    }
+
+    const toBeDeleted = newImages.filter((url) => !images.includes(url))
+
+    if (toBeDeleted.length) deleteImagesCloudinary(toBeDeleted)
+
+    onClose()
+    form.resetFields()
+    setNewThumbnail('')
+    setNewImages([])
+  }
+
   return (
     <Drawer
       title="Update product"
-      onClose={() => {
-        onClose()
-        form.resetFields()
-      }}
+      onClose={onCloseDrawer}
       open={open}
       destroyOnClose
       width={388}
@@ -124,10 +150,10 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
           required
         >
           <Upload
-            action="https://api.cloudinary.com/v1_1/spring8904/image/upload"
+            action={import.meta.env.VITE_CLOUDINARY_UPLOAD_URL}
             listType="picture-card"
             data={{
-              upload_preset: 'web209',
+              upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
             }}
             beforeUpload={beforeUpload}
             onChange={handleUploadThumbChange}
@@ -191,14 +217,14 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
           getValueFromEvent={normFile}
         >
           <Upload
-            action="https://api.cloudinary.com/v1_1/spring8904/image/upload"
+            action={import.meta.env.VITE_CLOUDINARY_UPLOAD_URL}
             listType="picture-card"
             data={{
-              upload_preset: 'web209',
+              upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
             }}
             beforeUpload={beforeUpload}
             onChange={handleUploadImagesChange}
-            defaultFileList={product?.images?.map((url, i) => ({
+            defaultFileList={product.images?.map((url, i) => ({
               uid: i,
               url,
             }))}

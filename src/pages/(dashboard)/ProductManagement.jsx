@@ -88,7 +88,10 @@ const ProductManagement = () => {
     },
     {
       render: (_, record) => (
-        <Dropdown menu={{ items: getProductActionItems(record) }}>
+        <Dropdown
+          trigger={['click']}
+          menu={{ items: getProductActionItems(record) }}
+        >
           <a onClick={(e) => e.preventDefault()}>
             <Space>
               Action

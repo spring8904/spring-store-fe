@@ -1,8 +1,26 @@
+import { jwtDecode } from 'jwt-decode'
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const token = localStorage.getItem('token')
+  let isAdmin = false
+  const isLogin = !!token
+  const navigate = useNavigate()
+
+  try {
+    const decodedToken = jwtDecode(token)
+
+    if (decodedToken.role === 'admin') isAdmin = true
+  } catch (error) {
+    console.log(error)
+  }
+
+  const logout = () => {
+    localStorage.removeItem('token')
+    navigate('/login')
+  }
   return (
     <nav className="bg-white dark:bg-gray-800 antialiased">
       <div className="max-w-screen-xl px-4 mx-auto 2xl:px-0 py-4">
@@ -16,6 +34,16 @@ const Header = () => {
             </div>
 
             <ul className="hidden lg:flex items-center justify-start gap-6 md:gap-8 py-3 sm:justify-center">
+              {isAdmin && (
+                <li className="shrink-0">
+                  <NavLink
+                    to="/dashboard"
+                    className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                  >
+                    Dashboard
+                  </NavLink>
+                </li>
+              )}
               <li>
                 <NavLink
                   to="/"
@@ -32,31 +60,35 @@ const Header = () => {
                   Shop
                 </NavLink>
               </li>
-              <li className="shrink-0">
-                <NavLink
-                  to="/login"
-                  className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
-                >
-                  Login
-                </NavLink>
-              </li>
-
-              <li className="shrink-0">
-                <NavLink
-                  to="/register"
-                  className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
-                >
-                  Register
-                </NavLink>
-              </li>
-              <li className="shrink-0">
-                <NavLink
-                  to="/dashboard"
-                  className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
-                >
-                  Dashboard
-                </NavLink>
-              </li>
+              {isLogin ? (
+                <li className="shrink-0">
+                  <button
+                    onClick={logout}
+                    className="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                  >
+                    Logout
+                  </button>
+                </li>
+              ) : (
+                <>
+                  <li className="shrink-0">
+                    <NavLink
+                      to="/login"
+                      className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                    >
+                      Login
+                    </NavLink>
+                  </li>
+                  <li className="shrink-0">
+                    <NavLink
+                      to="/register"
+                      className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                    >
+                      Register
+                    </NavLink>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -148,6 +180,16 @@ const Header = () => {
           } px-4 mt-4 lg:hidden`}
         >
           <ul className="text-gray-900 dark:text-white text-sm font-medium space-y-3">
+            {isAdmin && (
+              <li className="shrink-0">
+                <NavLink
+                  to="/dashboard"
+                  className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                >
+                  Dashboard
+                </NavLink>
+              </li>
+            )}
             <li>
               <NavLink
                 to="/"
@@ -164,30 +206,35 @@ const Header = () => {
                 Shop
               </NavLink>
             </li>
-            <li className="shrink-0">
-              <NavLink
-                to="/login"
-                className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
-              >
-                Login
-              </NavLink>
-            </li>
-            <li className="shrink-0">
-              <NavLink
-                to="/register"
-                className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
-              >
-                Register
-              </NavLink>
-            </li>
-            <li className="shrink-0">
-              <NavLink
-                to="/dashboard"
-                className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
-              >
-                Dashboard
-              </NavLink>
-            </li>
+            {isLogin ? (
+              <li className="shrink-0">
+                <button
+                  onClick={logout}
+                  className="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                >
+                  Logout
+                </button>
+              </li>
+            ) : (
+              <>
+                <li className="shrink-0">
+                  <NavLink
+                    to="/login"
+                    className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                  >
+                    Login
+                  </NavLink>
+                </li>
+                <li className="shrink-0">
+                  <NavLink
+                    to="/register"
+                    className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                  >
+                    Register
+                  </NavLink>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

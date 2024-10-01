@@ -33,17 +33,13 @@ const ProductCreationDrawer = ({ open, onClose }) => {
   }
 
   const normFile = (e) => {
-    if (Array.isArray(e)) {
-      return e
-    }
+    if (Array.isArray(e)) return e
+
     return e?.fileList
   }
 
   const handleUploadThumbChange = ({ file }) => {
-    if (file.status === 'uploading') {
-      setLoading(true)
-      return
-    }
+    if (file.status === 'uploading') setLoading(true)
 
     if (file.status === 'done') {
       if (thumbnail) deleteImagesCloudinary([thumbnail])
@@ -53,10 +49,7 @@ const ProductCreationDrawer = ({ open, onClose }) => {
   }
 
   const handleUploadImagesChange = ({ file, fileList }) => {
-    if (file.status === 'uploading') {
-      setLoading(true)
-      return
-    }
+    if (file.status === 'uploading') setLoading(true)
 
     if (file.status === 'done') {
       setLoading(false)
@@ -76,7 +69,7 @@ const ProductCreationDrawer = ({ open, onClose }) => {
     }
 
     if (!thumbnail) {
-      message.error('Please upload an image')
+      message.error('Please upload the thumbnail of product!')
       return
     }
 
@@ -85,13 +78,11 @@ const ProductCreationDrawer = ({ open, onClose }) => {
 
   const beforeUpload = (file) => {
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
-    if (!isJpgOrPng) {
-      message.error('You can only upload JPG/PNG file!')
-    }
+    if (!isJpgOrPng) message.error('You can only upload JPG/PNG file!')
+
     const isLt2M = file.size / 1024 / 1024 < 2
-    if (!isLt2M) {
-      message.error('Image must smaller than 2MB!')
-    }
+    if (!isLt2M) message.error('Image must smaller than 2MB!')
+
     return isJpgOrPng && isLt2M
   }
 
@@ -99,13 +90,9 @@ const ProductCreationDrawer = ({ open, onClose }) => {
     <Drawer
       title="Create a new product"
       onClose={() => {
-        if (thumbnail) {
-          deleteImagesCloudinary([thumbnail])
-        }
+        if (thumbnail) deleteImagesCloudinary([thumbnail])
 
-        if (images.length) {
-          deleteImagesCloudinary(images)
-        }
+        if (images.length) deleteImagesCloudinary(images)
 
         onCloseDrawer()
       }}

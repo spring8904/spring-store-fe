@@ -5,32 +5,29 @@ import PropTypes from 'prop-types'
 import { memo, useEffect, useState } from 'react'
 import { updateProduct } from '../../services/product'
 import { deleteImagesCloudinary } from '../../services/image'
+import deepEqual from 'deep-equal'
 const { TextArea } = Input
 
 const ProductUpdateDrawer = ({ open, onClose, product }) => {
   const queryClient = useQueryClient()
   const [form] = Form.useForm()
-  const [thumbnail, setThumbnail] = useState('')
+  const [oldThumbnail, setOldThumbnail] = useState('')
   const [newThumbnail, setNewThumbnail] = useState('')
-  const [images, setImages] = useState([])
+  const [oldImages, setOldImages] = useState([])
   const [newImages, setNewImages] = useState([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!open) return
     form.setFieldsValue(product)
-    setThumbnail(product.thumbnail)
-    setImages(product.images)
+    setOldThumbnail(product.thumbnail)
+    setOldImages(product.images)
+    setNewImages(product.images)
   }, [form, product, open])
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (values) => await updateProduct(product?._id, values),
     onSuccess: () => {
-      if (newThumbnail) deleteImagesCloudinary([thumbnail])
-
-      const toBeDeleted = images.filter((url) => !newImages.includes(url))
-
-      if (toBeDeleted.length) deleteImagesCloudinary(toBeDeleted)
       message.success('Product updated successfully')
       queryClient.invalidateQueries({
         queryKey: ['products'],
@@ -40,17 +37,12 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
   })
 
   const normFile = (e) => {
-    if (Array.isArray(e)) {
-      return e
-    }
+    if (Array.isArray(e)) return e
     return e?.fileList
   }
 
   const handleUploadThumbChange = ({ file }) => {
-    if (file.status === 'uploading') {
-      setLoading(true)
-      return
-    }
+    if (file.status === 'uploading') setLoading(true)
 
     if (file.status === 'done') {
       setLoading(false)
@@ -59,10 +51,7 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
   }
 
   const handleUploadImagesChange = ({ file, fileList }) => {
-    if (file.status === 'uploading') {
-      setLoading(true)
-      return
-    }
+    if (file.status === 'uploading') setLoading(true)
 
     if (file.status === 'done') {
       setLoading(false)
@@ -75,7 +64,6 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
     }
 
     if (file.status === 'removed') {
-      deleteImagesCloudinary([file.url])
       setNewImages(
         fileList.map((file) => {
           if (file.url) return file.url
@@ -91,33 +79,40 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
       return
     }
 
-    if (!newThumbnail) {
-      message.error('Please upload an image')
+    const updateData = {
+      ...values,
+      thumbnail: newThumbnail || oldThumbnail,
+      images: newImages,
+    }
+
+    // eslint-disable-next-line no-unused-vars
+    const productData = (({ _id, updatedAt, key, createdAt, ...rest }) => rest)(
+      product,
+    )
+
+    if (deepEqual(productData, updateData)) {
+      message.warning('Nothing to update')
+      onClose()
       return
     }
 
-    mutate({ ...values, thumbnail: newThumbnail, images: newImages })
+    mutate(updateData)
   }
 
   const beforeUpload = (file) => {
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
-    if (!isJpgOrPng) {
-      message.error('You can only upload JPG/PNG file!')
-    }
+    if (!isJpgOrPng) message.error('You can only upload JPG/PNG file!')
+
     const isLt2M = file.size / 1024 / 1024 < 2
-    if (!isLt2M) {
-      message.error('Image must smaller than 2MB!')
-    }
+    if (!isLt2M) message.error('Image must smaller than 2MB!')
+
     return isJpgOrPng && isLt2M
   }
 
   const onCloseDrawer = () => {
-    if (newThumbnail) {
-      deleteImagesCloudinary([newThumbnail])
-    }
+    if (newThumbnail) deleteImagesCloudinary([newThumbnail])
 
-    const toBeDeleted = newImages.filter((url) => !images.includes(url))
-
+    const toBeDeleted = newImages.filter((url) => !oldImages.includes(url))
     if (toBeDeleted.length) deleteImagesCloudinary(toBeDeleted)
 
     onClose()
@@ -144,7 +139,7 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
         initialValues={product}
       >
         <Form.Item
-          label="Product Image:"
+          label="Product Thumbnail:"
           valuePropName="fileList"
           getValueFromEvent={normFile}
           required

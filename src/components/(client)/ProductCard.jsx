@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
+import { Link } from 'react-router-dom'
 
 const ProductCard = ({ product }) => {
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="h-56 w-full">
         <Link to={`/products/${product._id}`}>
-          <img className="mx-auto h-full" src={product.image} />
+          <img className="mx-auto h-full" src={product.thumbnail} />
           <img
             className="mx-auto hidden h-full dark:block"
             src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/imac-front-dark.svg"
@@ -222,7 +222,7 @@ const ProductCard = ({ product }) => {
 ProductCard.propTypes = {
   product: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-    image: PropTypes.string.isRequired,
+    thumbnail: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     price: PropTypes.number.isRequired,
   }).isRequired,

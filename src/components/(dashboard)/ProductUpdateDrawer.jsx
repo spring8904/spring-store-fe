@@ -34,6 +34,15 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
       })
       onClose()
     },
+    onError: (error) => {
+      if (Array.isArray(error.response?.data?.message)) {
+        error.response?.data?.message.map((err) => {
+          message.error(err)
+        })
+        return
+      }
+      message.error(error.response?.data?.message)
+    },
   })
 
   const normFile = (e) => {

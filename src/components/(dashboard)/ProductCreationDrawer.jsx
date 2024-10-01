@@ -23,6 +23,15 @@ const ProductCreationDrawer = ({ open, onClose }) => {
         queryKey: ['products'],
       })
     },
+    onError: (error) => {
+      if (Array.isArray(error.response?.data?.message)) {
+        error.response?.data?.message.map((err) => {
+          message.error(err)
+        })
+        return
+      }
+      message.error(error.response?.data?.message)
+    },
   })
 
   const onCloseDrawer = () => {
@@ -65,11 +74,6 @@ const ProductCreationDrawer = ({ open, onClose }) => {
   const onFinish = (values) => {
     if (loading) {
       message.warning('Image is uploading, please wait')
-      return
-    }
-
-    if (!thumbnail) {
-      message.error('Please upload the thumbnail of product!')
       return
     }
 

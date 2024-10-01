@@ -7,9 +7,7 @@ const Navbar = () => {
   const [title, setTitle] = useState('')
 
   useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setTitle(document.title)
-    })
+    const observer = new MutationObserver(() => setTitle(document.title))
 
     observer.observe(document.querySelector('title'), {
       childList: true,

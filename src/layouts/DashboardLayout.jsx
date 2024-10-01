@@ -1,12 +1,26 @@
 import { Layout } from 'antd'
+import { jwtDecode } from 'jwt-decode'
 import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import Navbar from '../components/(dashboard)/Navbar'
 import Sidebar from '../components/(dashboard)/Sidebar'
 const { Header, Footer, Sider, Content } = Layout
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false)
+
+  const token = localStorage.getItem('token')
+
+  if (!token) return <Navigate to="/login" />
+
+  try {
+    const decodedToken = jwtDecode(token)
+
+    if (decodedToken.role !== 'admin') return <Navigate to="/" />
+    // eslint-disable-next-line no-unused-vars
+  } catch (error) {
+    return <Navigate to="/" />
+  }
 
   return (
     <Layout className="min-h-screen">

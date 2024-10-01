@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -17,28 +17,45 @@ const Header = () => {
 
             <ul className="hidden lg:flex items-center justify-start gap-6 md:gap-8 py-3 sm:justify-center">
               <li>
-                <Link
+                <NavLink
                   to="/"
-                  className="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                  className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
                 >
                   Home
-                </Link>
+                </NavLink>
               </li>
               <li className="shrink-0">
-                <Link
+                <NavLink
                   to="/shop"
-                  className="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                  className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
                 >
                   Shop
-                </Link>
+                </NavLink>
               </li>
               <li className="shrink-0">
-                <Link
+                <NavLink
+                  to="/login"
+                  className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                >
+                  Login
+                </NavLink>
+              </li>
+
+              <li className="shrink-0">
+                <NavLink
+                  to="/register"
+                  className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                >
+                  Register
+                </NavLink>
+              </li>
+              <li className="shrink-0">
+                <NavLink
                   to="/dashboard"
-                  className="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                  className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
                 >
                   Dashboard
-                </Link>
+                </NavLink>
               </li>
             </ul>
           </div>
@@ -128,24 +145,48 @@ const Header = () => {
           id="ecommerce-navbar-menu-1"
           className={`bg-gray-50 dark:bg-gray-700 dark:border-gray-600 border border-gray-200 rounded-lg py-3 ${
             isOpen ? '' : 'hidden'
-          } px-4 mt-4`}
+          } px-4 mt-4 lg:hidden`}
         >
           <ul className="text-gray-900 dark:text-white text-sm font-medium space-y-3">
             <li>
-              <Link
+              <NavLink
                 to="/"
-                className="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
               >
                 Home
-              </Link>
+              </NavLink>
             </li>
             <li className="shrink-0">
-              <Link
+              <NavLink
                 to="/shop"
-                className="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
               >
                 Shop
-              </Link>
+              </NavLink>
+            </li>
+            <li className="shrink-0">
+              <NavLink
+                to="/login"
+                className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+              >
+                Login
+              </NavLink>
+            </li>
+            <li className="shrink-0">
+              <NavLink
+                to="/register"
+                className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+              >
+                Register
+              </NavLink>
+            </li>
+            <li className="shrink-0">
+              <NavLink
+                to="/dashboard"
+                className="aria-[current=page]:text-primary-700 flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+              >
+                Dashboard
+              </NavLink>
             </li>
           </ul>
         </div>

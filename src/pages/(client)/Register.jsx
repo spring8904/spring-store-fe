@@ -1,30 +1,11 @@
-import { useMutation } from '@tanstack/react-query'
-import { Button, Checkbox, Form, Input, message } from 'antd'
+import { Button, Checkbox, Form, Input } from 'antd'
 import { useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { register } from '../../services/auth'
+import { Link } from 'react-router-dom'
+import useAuth from '../../hooks/useAuth'
 
 const Register = () => {
   const [form] = Form.useForm()
-  const navigate = useNavigate()
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (values) => await register(values),
-    onSuccess: () => {
-      form.resetFields()
-      message.success('Register successfully')
-      navigate('/login')
-    },
-    onError: (error) => {
-      if (Array.isArray(error.response?.data?.message)) {
-        error.response?.data?.message.map((err) => {
-          message.error(err)
-        })
-        return
-      }
-      message.error(error.response?.data?.message)
-    },
-  })
+  const { register, isRegisterPending } = useAuth()
 
   useEffect(() => {
     document.title = 'Register'
@@ -46,8 +27,8 @@ const Register = () => {
               className="space-y-4 md:space-y-6"
               name="login"
               form={form}
-              onFinish={mutate}
-              disabled={isPending}
+              onFinish={register}
+              disabled={isRegisterPending}
               layout="vertical"
               requiredMark="optional"
             >

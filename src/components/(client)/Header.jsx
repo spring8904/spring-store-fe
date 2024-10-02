@@ -1,26 +1,22 @@
 import { jwtDecode } from 'jwt-decode'
 import { useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
+import useAuth from '../../hooks/useAuth'
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
   const token = localStorage.getItem('token')
   let isAdmin = false
   const isLogin = !!token
-  const navigate = useNavigate()
 
-  try {
+  if (token) {
     const decodedToken = jwtDecode(token)
 
     if (decodedToken.role === 'admin') isAdmin = true
-  } catch (error) {
-    console.log(error)
   }
 
-  const logout = () => {
-    localStorage.removeItem('token')
-    navigate('/login')
-  }
+  const { logout } = useAuth()
+
   return (
     <nav className="bg-white dark:bg-gray-800 antialiased">
       <div className="max-w-screen-xl px-4 mx-auto 2xl:px-0 py-4">

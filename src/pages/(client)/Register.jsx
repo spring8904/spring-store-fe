@@ -1,15 +1,31 @@
-import { Button, Checkbox, Form, Input } from 'antd'
+import { Button, Checkbox, Form, Input, message } from 'antd'
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
+import { handleError } from '../../utils'
+const { Password } = Input
+const { Item } = Form
 
 const Register = () => {
-  const [form] = Form.useForm()
-  const { register, isRegisterPending } = useAuth()
-
   useEffect(() => {
     document.title = 'Register'
   }, [])
+
+  const [form] = Form.useForm()
+  const {
+    registerMutation: { mutate, isPending },
+  } = useAuth()
+  const navigate = useNavigate()
+
+  const onFinish = async (values) => {
+    mutate(values, {
+      onSuccess: () => {
+        navigate('/login')
+        message.success('Register successfully')
+      },
+      onError: handleError,
+    })
+  }
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
@@ -27,12 +43,12 @@ const Register = () => {
               className="space-y-4 md:space-y-6"
               name="login"
               form={form}
-              onFinish={register}
-              disabled={isRegisterPending}
+              onFinish={onFinish}
+              disabled={isPending}
               layout="vertical"
               requiredMark="optional"
             >
-              <Form.Item
+              <Item
                 label="Your email:"
                 name="email"
                 rules={[
@@ -46,10 +62,10 @@ const Register = () => {
                   },
                 ]}
               >
-                <Input className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-              </Form.Item>
+                <Input />
+              </Item>
 
-              <Form.Item
+              <Item
                 label="Your password:"
                 name="password"
                 rules={[
@@ -63,20 +79,17 @@ const Register = () => {
                   },
                 ]}
               >
-                <Input
-                  type="password"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                />
-              </Form.Item>
+                <Password />
+              </Item>
 
-              <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox defaultChecked>
                   I accept the{' '}
                   <span className="font-medium text-primary-600 hover:underline dark:text-primary-500">
                     Terms and Conditions
                   </span>
                 </Checkbox>
-              </Form.Item>
+              </Item>
 
               <Button block type="primary" htmlType="submit">
                 Create an account
@@ -84,7 +97,7 @@ const Register = () => {
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Already have an account?
                 <Link
-                  to="/register"
+                  to="/login"
                   className="font-medium text-primary-600 hover:underline dark:text-primary-500"
                 >
                   Login here

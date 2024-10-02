@@ -1,15 +1,31 @@
-import { Button, Checkbox, Flex, Form, Input } from 'antd'
+import { Button, Checkbox, Flex, Form, Input, message } from 'antd'
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
+import { handleError } from '../../utils'
+const { Item } = Form
+const { Password } = Input
 
 const Login = () => {
-  const [form] = Form.useForm()
-  const { login, isLoginPending } = useAuth()
-
   useEffect(() => {
     document.title = 'Login'
   }, [])
+
+  const [form] = Form.useForm()
+  const {
+    loginMutation: { mutate, isPending },
+  } = useAuth()
+  const navigate = useNavigate()
+
+  const onFinish = async (values) => {
+    mutate(values, {
+      onSuccess: (res) => {
+        message.success('Login successfully')
+        res.isAdmin ? navigate('/dashboard') : navigate('/')
+      },
+      onError: handleError,
+    })
+  }
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
@@ -27,12 +43,12 @@ const Login = () => {
               className="space-y-4 md:space-y-6"
               name="login"
               form={form}
-              onFinish={login}
-              disabled={isLoginPending}
+              onFinish={onFinish}
+              disabled={isPending}
               layout="vertical"
               requiredMark="optional"
             >
-              <Form.Item
+              <Item
                 label="Your email:"
                 name="email"
                 rules={[
@@ -46,10 +62,10 @@ const Login = () => {
                   },
                 ]}
               >
-                <Input className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-              </Form.Item>
+                <Input />
+              </Item>
 
-              <Form.Item
+              <Item
                 label="Your password:"
                 name="password"
                 rules={[
@@ -63,17 +79,14 @@ const Login = () => {
                   },
                 ]}
               >
-                <Input
-                  type="password"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                />
-              </Form.Item>
+                <Password />
+              </Item>
 
-              <Form.Item>
+              <Item>
                 <Flex justify="space-between" align="center">
-                  <Form.Item name="remember" valuePropName="checked" noStyle>
+                  <Item name="remember" valuePropName="checked" noStyle>
                     <Checkbox>Remember me</Checkbox>
-                  </Form.Item>
+                  </Item>
                   <a
                     href="#"
                     className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500"
@@ -81,7 +94,7 @@ const Login = () => {
                     Forgot password?
                   </a>
                 </Flex>
-              </Form.Item>
+              </Item>
 
               <Button block type="primary" htmlType="submit">
                 Log in

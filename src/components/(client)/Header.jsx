@@ -9,12 +9,10 @@ const Header = () => {
   const isLogin = !!token
   const navigate = useNavigate()
 
-  try {
+  if (token) {
     const decodedToken = jwtDecode(token)
 
     if (decodedToken.role === 'admin') isAdmin = true
-  } catch (error) {
-    console.log(error)
   }
 
   const logout = () => {

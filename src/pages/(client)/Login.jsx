@@ -1,34 +1,11 @@
-import { useMutation } from '@tanstack/react-query'
-import { Button, Checkbox, Flex, Form, Input, message } from 'antd'
-import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../../services/auth'
+import { Button, Checkbox, Flex, Form, Input } from 'antd'
 import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import useAuth from '../../hooks/useAuth'
 
 const Login = () => {
   const [form] = Form.useForm()
-  const navigate = useNavigate()
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (values) => await login(values),
-    onSuccess: (res) => {
-      if (res.data?.token) localStorage.setItem('token', res.data.token)
-
-      form.resetFields()
-      message.success('Login successfully')
-
-      if (res.data?.isAdmin) navigate('/dashboard')
-      else navigate('/')
-    },
-    onError: (error) => {
-      if (Array.isArray(error.response?.data?.message)) {
-        error.response?.data?.message.map((err) => {
-          message.error(err)
-        })
-        return
-      }
-      message.error(error.response?.data?.message)
-    },
-  })
+  const { login, isLoginPending } = useAuth()
 
   useEffect(() => {
     document.title = 'Login'
@@ -50,8 +27,8 @@ const Login = () => {
               className="space-y-4 md:space-y-6"
               name="login"
               form={form}
-              onFinish={mutate}
-              disabled={isPending}
+              onFinish={login}
+              disabled={isLoginPending}
               layout="vertical"
               requiredMark="optional"
             >

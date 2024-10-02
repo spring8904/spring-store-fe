@@ -13,14 +13,12 @@ const DashboardLayout = () => {
 
   if (!token) return <Navigate to="/login" />
 
-  try {
-    const decodedToken = jwtDecode(token)
+  const decodedToken = jwtDecode(token)
 
-    if (decodedToken.role !== 'admin') return <Navigate to="/" />
-    // eslint-disable-next-line no-unused-vars
-  } catch (error) {
-    return <Navigate to="/" />
-  }
+  if (decodedToken.exp < Math.floor(Date.now() / 1000))
+    return <Navigate to="/login" />
+
+  if (decodedToken.role !== 'admin') return <Navigate to="/" />
 
   return (
     <Layout className="min-h-screen">

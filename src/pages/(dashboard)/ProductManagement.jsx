@@ -1,7 +1,6 @@
 import {
   DownOutlined,
-  ExclamationCircleFilled,
-  PlusOutlined,
+  ExclamationCircleFilled
 } from '@ant-design/icons'
 import { Button, Dropdown, Modal } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
@@ -76,11 +75,7 @@ const ProductManagement = () => {
     <div className="p-8">
       <div className="bg-white p-4 rounded-lg">
         <div className="flex justify-end items-center gap-2 mb-3">
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={showCreationDrawer}
-          >
+          <Button type="primary" onClick={showCreationDrawer}>
             Add product
           </Button>
           <Dropdown menu={{ items }} placement="bottomRight">

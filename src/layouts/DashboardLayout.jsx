@@ -1,9 +1,10 @@
-import { Layout } from 'antd'
+import { Button, Layout } from 'antd'
 import { jwtDecode } from 'jwt-decode'
 import { useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import Navbar from '../components/(dashboard)/Navbar'
 import Sidebar from '../components/(dashboard)/Sidebar'
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
 const { Header, Footer, Sider, Content } = Layout
 
 const DashboardLayout = () => {
@@ -26,14 +27,20 @@ const DashboardLayout = () => {
         className="drop-shadow-2xl"
         collapsible
         collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
         theme="light"
         width={256}
+        trigger={null}
       >
         <Sidebar collapsed={collapsed} />
       </Sider>
       <Layout>
-        <Header className="bg-white">
+        <Header className="bg-white pr-12 pl-0 flex items-center gap-4">
+          <Button
+            type="default"
+            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            onClick={() => setCollapsed(!collapsed)}
+            className="inline-block text-base -ml-4"
+          />
           <Navbar />
         </Header>
         <Content>

@@ -17,8 +17,8 @@ const Navbar = () => {
   }, [])
 
   return (
-    <div className="flex items-center justify-between h-full text-gray-500">
-      <span className="text-lg">{title}</span>
+    <div className="flex items-center justify-between h-full text-gray-500 flex-1">
+      <span className="text-xl">{title}</span>
       <div className="flex gap-6 items-center">
         <Search className="w-52 border-black" placeholder="Search" allowClear />
         <AppstoreOutlined className="text-2xl" />

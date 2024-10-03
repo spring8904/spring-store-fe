@@ -38,7 +38,7 @@ const Sidebar = ({ collapsed }) => {
 
   return (
     <>
-      <div className="py-5">
+      <div className="py-4">
         <Link
           to="/"
           className="flex items-center hover:text-black justify-center"

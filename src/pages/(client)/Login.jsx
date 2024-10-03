@@ -17,7 +17,7 @@ const Login = () => {
   } = useAuth()
   const navigate = useNavigate()
 
-  const onFinish = async (values) => {
+  const onFinish = (values) =>
     mutate(values, {
       onSuccess: (res) => {
         message.success('Login successfully')
@@ -25,7 +25,6 @@ const Login = () => {
       },
       onError: handleError,
     })
-  }
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">

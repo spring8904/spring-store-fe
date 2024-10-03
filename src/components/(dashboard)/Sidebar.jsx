@@ -4,7 +4,6 @@ import {
   ShopOutlined,
 } from '@ant-design/icons'
 import { Divider, Menu } from 'antd'
-import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
@@ -66,10 +65,6 @@ const Sidebar = ({ collapsed }) => {
       />
     </>
   )
-}
-
-Sidebar.propTypes = {
-  collapsed: PropTypes.bool.isRequired,
 }
 
 export default Sidebar

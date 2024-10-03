@@ -17,7 +17,7 @@ const Register = () => {
   } = useAuth()
   const navigate = useNavigate()
 
-  const onFinish = async (values) => {
+  const onFinish = (values) =>
     mutate(values, {
       onSuccess: () => {
         navigate('/login')
@@ -25,7 +25,6 @@ const Register = () => {
       },
       onError: handleError,
     })
-  }
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">

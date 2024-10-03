@@ -1,18 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
 import { Spin } from 'antd'
+import { useEffect } from 'react'
 import HeroSection from '../../components/(client)/HeroSection'
 import ProductCard from '../../components/(client)/ProductCard'
-import { getAllProducts } from '../../services/product'
-import { useEffect } from 'react'
+import useProduct from '../../hooks/useProduct'
 
 const Home = () => {
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['products'],
-    queryFn: async () => {
-      const { data } = await getAllProducts()
-      return data.data
-    },
-  })
+  const {
+    getAllProductsQuery: { data, isLoading, isError, error },
+  } = useProduct()
 
   useEffect(() => {
     document.title = 'Home'

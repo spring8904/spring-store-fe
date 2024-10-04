@@ -3,21 +3,23 @@ import {
   DownOutlined,
   EditOutlined,
   ExclamationCircleFilled,
-  EyeOutlined,
+  SearchOutlined,
 } from '@ant-design/icons'
 import {
   Button,
   Dropdown,
   Image,
+  Input,
   message,
   Modal,
-  Rate,
   Space,
   Table,
+  Tag,
 } from 'antd'
-import { memo } from 'react'
+import { memo, useRef, useState } from 'react'
 import useProduct from '../../hooks/useProduct'
 import { handleError } from '../../utils'
+import Highlighter from 'react-highlight-words'
 const { confirm } = Modal
 
 const ProductTable = ({ setSelectedRows, showUpdateDrawer }) => {
@@ -26,31 +28,140 @@ const ProductTable = ({ setSelectedRows, showUpdateDrawer }) => {
     deleteProductMutation: { mutate, isPending },
   } = useProduct()
 
+  const [searchText, setSearchText] = useState('')
+  const [searchedColumn, setSearchedColumn] = useState('')
+  const searchInput = useRef(null)
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm()
+    setSearchText(selectedKeys[0])
+    setSearchedColumn(dataIndex)
+  }
+
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, close }) => (
+      <div className="p-2 flex flex-col" onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          allowClear
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          className="mb-2"
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+          >
+            Search
+          </Button>
+          <Button type="default" size="small" onClick={close}>
+            Close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100)
+      }
+    },
+    render: (text, record) =>
+      searchedColumn === dataIndex ? (
+        <Space>
+          {dataIndex === 'title' && <Image width={64} src={record.thumbnail} />}
+          <Highlighter
+            highlightStyle={{
+              backgroundColor: '#ffc069',
+              padding: 0,
+            }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ''}
+          />
+        </Space>
+      ) : (
+        <Space>
+          {dataIndex === 'title' && <Image width={64} src={record.thumbnail} />}
+          {text}
+        </Space>
+      ),
+  })
+
   const columns = [
     {
       title: 'PRODUCT',
       dataIndex: 'title',
-      render: (title, { thumbnail }) => (
-        <div className="flex items-center gap-4">
-          <Image width={64} src={thumbnail} /> {title}
-        </div>
-      ),
+      render: (text, record) =>
+        searchedColumn === 'title' ? (
+          <Space>
+            <Image width={64} src={record.thumbnail} />
+            <Highlighter
+              highlightStyle={{
+                backgroundColor: '#ffc069',
+                padding: 0,
+              }}
+              searchWords={[searchText]}
+              autoEscape
+              textToHighlight={text ? text.toString() : ''}
+            />
+          </Space>
+        ) : (
+          <Space>
+            <Image width={64} src={record.thumbnail} />
+            {text}
+          </Space>
+        ),
+      ...getColumnSearchProps('title'),
+    },
+    {
+      title: 'QTY',
+      dataIndex: 'quantity',
+      render: (quantity) =>
+        quantity < 10 ? (
+          <>
+            <Tag color="gold">Low stock</Tag>
+            <span className="text-yellow-500">{quantity}</span>
+          </>
+        ) : (
+          quantity
+        ),
+      sorter: (a, b) => a.price - b.price,
     },
     {
       title: 'PRICE',
       dataIndex: 'price',
-      render: (price) => <span>${price}</span>,
+      render: (price) => '$' + price,
+      sorter: (a, b) => a.price - b.price,
     },
     {
-      title: 'RATING',
-      render: () => {
-        const rate = Number((Math.random() * (5 - 1) + 1).toFixed(1))
-        return (
-          <div className="flex items-center gap-1">
-            <Rate allowHalf disabled value={rate} /> {rate}
-          </div>
-        )
+      title: 'STATUS',
+      dataIndex: 'status',
+      render: (status) => {
+        switch (status) {
+          case 'draft':
+            return <Tag color="blue">Draft</Tag>
+          case 'published':
+            return <Tag color="green">Published</Tag>
+          case 'inactive':
+            return <Tag color="red">Inactive</Tag>
+        }
       },
+      sorter: (a, b) => a.status.localeCompare(b.status),
     },
     {
       render: (_, record) => (
@@ -82,14 +193,6 @@ const ProductTable = ({ setSelectedRows, showUpdateDrawer }) => {
           }}
         >
           Edit
-        </Button>
-      ),
-    },
-    {
-      key: 'preview',
-      label: (
-        <Button block color="default" variant="outlined" icon={<EyeOutlined />}>
-          Preview
         </Button>
       ),
     },

@@ -9,15 +9,18 @@ const ProductCreationDrawer = ({ open, onClose }) => {
     createProductMutation: { mutate, isPending },
   } = useProduct()
 
-  const onFinish = useCallback((values) => {
-    mutate(values, {
-      onSuccess: () => {
-        onClose()
-        message.success('Product created successfully')
-      },
-      onError: handleError,
-    })
-  }, [])
+  const onFinish = useCallback(
+    (values) => {
+      mutate(values, {
+        onSuccess: () => {
+          onClose()
+          message.success('Product created successfully')
+        },
+        onError: handleError,
+      })
+    },
+    [mutate, onClose],
+  )
 
   return (
     <Drawer

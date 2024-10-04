@@ -1,4 +1,4 @@
-import { message } from 'antd'
+import { message, Upload } from 'antd'
 
 export const handleError = (error) => {
   error.message
@@ -15,5 +15,5 @@ export const beforeUpload = (file) => {
   const isLt2M = file.size / 1024 / 1024 < 2
   if (!isLt2M) message.error('Image must smaller than 2MB!')
 
-  return isJpgOrPng && isLt2M
+  return (isJpgOrPng && isLt2M) || Upload.LIST_IGNORE
 }

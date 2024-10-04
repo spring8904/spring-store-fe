@@ -1,5 +1,15 @@
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Form, Input, InputNumber, message, Upload } from 'antd'
+import { PlusOutlined, UploadOutlined } from '@ant-design/icons'
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Row,
+  Select,
+  Upload,
+} from 'antd'
 import { memo, useEffect, useState } from 'react'
 import { beforeUpload } from '../../utils'
 const { Item } = Form
@@ -58,12 +68,13 @@ const ProductForm = ({ onFinish, isPending, product }) => {
       requiredMark="optional"
     >
       <Item
-        label="Product Thumbnail:"
+        label="Thumbnail:"
         valuePropName="fileList"
         getValueFromEvent={normFile}
         required
       >
         <Upload
+          className="!flex justify-center"
           action={import.meta.env.VITE_CLOUDINARY_UPLOAD_URL}
           listType="picture-card"
           data={{
@@ -76,6 +87,7 @@ const ProductForm = ({ onFinish, isPending, product }) => {
             product?.thumbnail ? [{ url: product.thumbnail }] : []
           }
           accept="image/jpeg,image/png"
+          showUploadList={{ showPreviewIcon: !!product?.thumbnail }}
         >
           <button type="button">
             <PlusOutlined />
@@ -85,7 +97,7 @@ const ProductForm = ({ onFinish, isPending, product }) => {
       </Item>
 
       <Item
-        label="Product title:"
+        label="Title:"
         name="title"
         rules={[
           {
@@ -98,25 +110,7 @@ const ProductForm = ({ onFinish, isPending, product }) => {
       </Item>
 
       <Item
-        label="Product Price:"
-        name="price"
-        rules={[
-          {
-            required: true,
-            message: 'Please input the price of product!',
-          },
-          {
-            type: 'number',
-            min: 0,
-            message: 'Price must be greater than 0',
-          },
-        ]}
-      >
-        <InputNumber className="w-full" />
-      </Item>
-
-      <Item
-        label="Description"
+        label="Description:"
         name="description"
         rules={[
           {
@@ -125,17 +119,73 @@ const ProductForm = ({ onFinish, isPending, product }) => {
           },
         ]}
       >
-        <TextArea rows={4} />
+        <TextArea rows={2} />
       </Item>
 
+      <Row gutter={8}>
+        <Col span={12}>
+          <Item
+            label="Price:"
+            name="price"
+            rules={[
+              {
+                required: true,
+                message: 'Please input the price!',
+              },
+              {
+                type: 'number',
+                min: 0,
+                message: 'Price must be greater than or equal to 0',
+              },
+            ]}
+          >
+            <InputNumber className="w-full" />
+          </Item>
+        </Col>
+
+        <Col span={12}>
+          <Item
+            label="Quantity:"
+            name="quantity"
+            rules={[
+              {
+                required: true,
+                message: 'Please input the quantity!',
+              },
+              {
+                type: 'number',
+                min: 1,
+                message: 'Quantity must be greater than or equal to 1',
+              },
+            ]}
+          >
+            <InputNumber className="w-full" />
+          </Item>
+        </Col>
+      </Row>
+
+      <Form.Item
+        name="status"
+        label="Status:"
+        rules={[{ required: true, message: 'Please select the status!' }]}
+      >
+        <Select
+          options={[
+            { label: 'Draft', value: 'draft' },
+            { label: 'Published', value: 'published' },
+            { label: 'Inactive', value: 'inactive' },
+          ]}
+        />
+      </Form.Item>
+
       <Item
-        label="Product Images:"
+        label="Images:"
         valuePropName="fileList"
         getValueFromEvent={normFile}
       >
         <Upload
           action={import.meta.env.VITE_CLOUDINARY_UPLOAD_URL}
-          listType="picture-card"
+          listType="picture"
           data={{
             upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
           }}
@@ -143,19 +193,23 @@ const ProductForm = ({ onFinish, isPending, product }) => {
           onChange={handleImagesChange}
           defaultFileList={
             product?.images.length
-              ? product.images.map((url, i) => ({
-                  uid: i,
-                  url,
-                }))
+              ? product.images.map((url, i) => {
+                  const parts = url.split('/')
+                  const name = parts[parts.length - 1]
+                  return {
+                    uid: i,
+                    url,
+                    name,
+                  }
+                })
               : []
           }
           multiple
           accept="image/jpeg,image/png"
         >
-          <button type="button">
-            <PlusOutlined />
-            <div>Upload</div>
-          </button>
+          <Button block icon={<UploadOutlined />}>
+            Upload
+          </Button>
         </Upload>
       </Item>
 

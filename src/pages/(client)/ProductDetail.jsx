@@ -1,21 +1,21 @@
-import { Breadcrumb, Rate, Spin } from 'antd'
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import useProduct from '../../hooks/useProduct'
 import {
   HeartOutlined,
   HomeOutlined,
   RightOutlined,
   ShoppingCartOutlined,
 } from '@ant-design/icons'
+import { Breadcrumb, Rate, Spin, Tabs } from 'antd'
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import useProduct from '../../hooks/useProduct'
 
 const ProductDetail = () => {
-  const { id } = useParams()
+  const { slug } = useParams()
   const [product, setProduct] = useState({})
 
   const {
-    getProductByIdQuery: { data, isLoading, isError, error },
-  } = useProduct(id)
+    getProductBySlugQuery: { data, isLoading, isError, error },
+  } = useProduct(slug)
 
   useEffect(() => {
     if (data) {
@@ -23,6 +23,38 @@ const ProductDetail = () => {
       document.title = data.title
     } else document.title = 'Product Detail'
   }, [data])
+
+  const tab = product.images?.length
+    ? product.images?.map((img, index) => ({
+        key: `${index + 2}`,
+        label: (
+          <img
+            className="w-16 h-16 object-contain"
+            src={img}
+            alt={product.title}
+          />
+        ),
+
+        children: <img className="w-full" src={img} alt={product.title} />,
+      }))
+    : []
+
+  const items = [
+    {
+      key: '1',
+      label: (
+        <img
+          className="w-16 h-16 object-contain"
+          src={product.thumbnail}
+          alt={product.title}
+        />
+      ),
+      children: (
+        <img className="w-full" src={product.thumbnail} alt={product.title} />
+      ),
+    },
+    ...tab,
+  ]
 
   if (isLoading)
     return (
@@ -63,8 +95,13 @@ const ProductDetail = () => {
             />
           </div>
           <div className="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
-            <div className="shrink-0 max-w-md lg:max-w-lg mx-auto">
-              <img className="w-full" src={product.thumbnail} />
+            <div className="shrink-0 max-w-md lg:max-w-lg mx-auto overflow-hidden">
+              <Tabs
+                tabPosition="left"
+                defaultActiveKey="1"
+                items={items}
+                className="h-96"
+              />
             </div>
 
             <div className="mt-6 sm:mt-8 lg:mt-0">

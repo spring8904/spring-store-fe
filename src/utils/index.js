@@ -10,10 +10,22 @@ export const handleError = (error) => {
 
 export const beforeUpload = (file) => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
-  if (!isJpgOrPng) message.error('You can only upload JPG/PNG file!')
+  if (!isJpgOrPng) {
+    message.error('You can only upload JPG/PNG file!')
+    return Upload.LIST_IGNORE
+  }
 
   const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) message.error('Image must smaller than 2MB!')
+  if (!isLt2M) {
+    message.error('Image must smaller than 2MB!')
+    return Upload.LIST_IGNORE
+  }
 
-  return (isJpgOrPng && isLt2M) || Upload.LIST_IGNORE
+  return false
+}
+
+export const getPublicIdFromUrl = (url) => {
+  const regex = /\/upload\/(?:v\d+\/)?([^.]+)/
+  const matches = url.match(regex)
+  return matches ? matches[1] : null
 }

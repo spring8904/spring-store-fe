@@ -1,5 +1,4 @@
 import { Drawer, message } from 'antd'
-import deepEqual from 'deep-equal'
 import { memo, useCallback } from 'react'
 import useProduct from '../../hooks/useProduct'
 import { handleError } from '../../utils'
@@ -11,28 +10,17 @@ const ProductUpdateDrawer = ({ open, onClose, product }) => {
   } = useProduct()
 
   const onFinish = useCallback(
-    (values) => {
-      const productData = (({ _id, updatedAt, key, createdAt, ...rest }) =>
-        rest)(product)
-
-      if (deepEqual(productData, values)) {
-        message.warning('Nothing to update')
-        onClose()
-        return
-      }
-
-      mutate(
-        { ...values, id: product._id },
-        {
-          onSuccess: () => {
-            message.success('Product updated successfully')
-            onClose()
-          },
-          onError: handleError,
+    (formData) => {
+      formData.append('id', product._id)
+      mutate(formData, {
+        onSuccess: () => {
+          message.success('Product updated successfully')
+          onClose()
         },
-      )
+        onError: handleError,
+      })
     },
-    [product],
+    [mutate, onClose, product],
   )
 
   return (

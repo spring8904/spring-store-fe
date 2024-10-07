@@ -9,7 +9,7 @@ const instance = axios.create({
 
 instance.interceptors.response.use(
   (response) => response.data,
-  (error) => Promise.reject(error.response.data),
+  (error) => Promise.reject(error.response.data || 'Something went wrong'),
 )
 
 export default instance

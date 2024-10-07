@@ -2,23 +2,23 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createProduct,
   deleteProduct,
-  getAllProducts,
-  getProductById,
+  getProductBySlug,
+  getProducts,
   updateProduct,
 } from '../services/product'
 
-const useProduct = (id) => {
+const useProduct = (slug) => {
   const queryClient = useQueryClient()
 
-  const getAllProductsQuery = useQuery({
+  const getProductsQuery = useQuery({
     queryKey: ['products'],
-    queryFn: async () => (await getAllProducts()).data,
+    queryFn: async () => await getProducts(),
   })
 
-  const getProductByIdQuery = useQuery({
-    queryKey: ['product', id],
-    queryFn: async () => (await getProductById(id)).data,
-    enabled: !!id,
+  const getProductBySlugQuery = useQuery({
+    queryKey: ['product', slug],
+    queryFn: async () => await getProductBySlug(slug),
+    enabled: !!slug,
   })
 
   const createProductMutation = useMutation({
@@ -31,8 +31,11 @@ const useProduct = (id) => {
   })
 
   const updateProductMutation = useMutation({
-    mutationFn: async (values) =>
-      await updateProduct(values.id, { ...values, id: undefined }),
+    mutationFn: async (formData) => {
+      const id = formData.get('id')
+      formData.delete('id')
+      return await updateProduct(id, formData)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['products'],
@@ -48,8 +51,8 @@ const useProduct = (id) => {
   })
 
   return {
-    getAllProductsQuery,
-    getProductByIdQuery,
+    getProductsQuery,
+    getProductBySlugQuery,
     createProductMutation,
     updateProductMutation,
     deleteProductMutation,

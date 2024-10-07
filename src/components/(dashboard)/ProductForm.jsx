@@ -11,52 +11,91 @@ import {
   Upload,
 } from 'antd'
 import { memo, useEffect, useState } from 'react'
-import { beforeUpload } from '../../utils'
+import { beforeUpload, getPublicIdFromUrl } from '../../utils'
+import deepEqual from 'deep-equal'
 const { Item } = Form
 const { TextArea } = Input
 
 const ProductForm = ({ onFinish, isPending, product }) => {
   const [form] = Form.useForm()
-  const [loading, setLoading] = useState(false)
-  const [thumbnail, setThumbnail] = useState(product?.thumbnail || '')
-  const [images, setImages] = useState(product?.images || [])
+  const [thumbnail, setThumbnail] = useState([])
+  const [images, setImages] = useState([])
 
   useEffect(() => {
-    if (product) form.setFieldsValue(product)
+    if (product) {
+      const { thumbnail, images, ...rest } = product
+      setImages(images)
+      form.setFieldsValue({
+        ...rest,
+        thumbnail: [{ uid: '0', url: thumbnail }],
+        images: images.map((url) => {
+          const parts = url.split('/')
+          const name = parts[parts.length - 1]
+          return {
+            uid: getPublicIdFromUrl(url),
+            url,
+            name,
+            old: true,
+          }
+        }),
+      })
+    }
   }, [product, form])
 
   const normFile = (e) => (Array.isArray(e) ? e : e?.fileList)
 
-  const handleThumbChange = ({ file }) => {
-    if (file.status === 'uploading') setLoading(true)
+  const handleThumbChange = ({ fileList }) => setThumbnail(fileList)
 
-    if (file.status === 'done') {
-      setLoading(false)
-      setThumbnail(file.response.secure_url)
-    }
-  }
-
-  const handleImagesChange = ({ file, fileList }) => {
-    switch (file.status) {
-      case 'uploading':
-        setLoading(true)
-        break
-      case 'done':
-        setLoading(false)
-        setImages((prev) => [...prev, file.response.secure_url])
-        break
-      case 'removed':
-        setImages(fileList.map((file) => file.url || file.response.secure_url))
-    }
-  }
+  const handleImagesChange = ({ fileList }) => setImages(fileList)
 
   const handleFinish = (values) => {
-    if (loading) {
-      message.warning('Image is uploading, please wait')
-      return
+    if (product) {
+      const isChange = hasChangesDetected()
+
+      if (!isChange) {
+        message.info('No changes detected!')
+        return
+      }
     }
 
-    onFinish({ ...values, thumbnail, images })
+    const formData = new FormData()
+
+    Object.keys(values).forEach((key) => {
+      if (
+        values[key] !== undefined &&
+        values[key] !== null &&
+        key !== 'images' &&
+        key !== 'thumbnail'
+      )
+        formData.append(key, values[key])
+    })
+
+    if (thumbnail.length)
+      formData.append('thumbnailFile', thumbnail[0].originFileObj)
+
+    if (images.length)
+      images.forEach((image) => {
+        if (image.originFileObj)
+          formData.append('imagesFile', image.originFileObj)
+
+        if (image.old) formData.append('oldImages', image.url)
+      })
+
+    onFinish(formData)
+  }
+
+  const hasChangesDetected = () => {
+    const formValues = form.getFieldsValue()
+    const transformedData = {
+      ...formValues,
+      thumbnail: formValues.thumbnail[0]?.url || '',
+      images: formValues.images.map((image) => image.url),
+    }
+
+    // eslint-disable-next-line no-unused-vars
+    const { createdAt, key, slug, updatedAt, _id, ...productValues } = product
+
+    return !deepEqual(transformedData, productValues)
   }
 
   return (
@@ -69,29 +108,24 @@ const ProductForm = ({ onFinish, isPending, product }) => {
     >
       <Item
         label="Thumbnail:"
+        name="thumbnail"
         valuePropName="fileList"
         getValueFromEvent={normFile}
-        required
+        rules={[{ required: true, message: 'Please upload the thumbnail!' }]}
       >
         <Upload
           className="!flex justify-center"
-          action={import.meta.env.VITE_CLOUDINARY_UPLOAD_URL}
           listType="picture-card"
-          data={{
-            upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
-          }}
+          accept="image/jpeg,image/png"
           beforeUpload={beforeUpload}
+          fileList={thumbnail}
           onChange={handleThumbChange}
           maxCount={1}
-          defaultFileList={
-            product?.thumbnail ? [{ url: product.thumbnail }] : []
-          }
-          accept="image/jpeg,image/png"
-          showUploadList={{ showPreviewIcon: !!product?.thumbnail }}
+          showUploadList={{ showPreviewIcon: false }}
         >
           <button type="button">
             <PlusOutlined />
-            <div>Upload</div>
+            <div>{thumbnail.length ? 'Edit' : 'Upload'}</div>
           </button>
         </Upload>
       </Item>
@@ -102,6 +136,7 @@ const ProductForm = ({ onFinish, isPending, product }) => {
         rules={[
           {
             required: true,
+            whitespace: true,
             message: 'Please input the title of product!',
           },
         ]}
@@ -115,6 +150,7 @@ const ProductForm = ({ onFinish, isPending, product }) => {
         rules={[
           {
             required: true,
+            whitespace: true,
             message: 'Please input the description of product!',
           },
         ]}
@@ -165,9 +201,16 @@ const ProductForm = ({ onFinish, isPending, product }) => {
       </Row>
 
       <Form.Item
-        name="status"
         label="Status:"
-        rules={[{ required: true, message: 'Please select the status!' }]}
+        name="status"
+        rules={[
+          { required: true, message: 'Please select the status!' },
+          {
+            type: 'enum',
+            enum: ['draft', 'published', 'inactive'],
+            message: 'Invalid status value',
+          },
+        ]}
       >
         <Select
           options={[
@@ -180,32 +223,18 @@ const ProductForm = ({ onFinish, isPending, product }) => {
 
       <Item
         label="Images:"
+        name="images"
         valuePropName="fileList"
         getValueFromEvent={normFile}
       >
         <Upload
-          action={import.meta.env.VITE_CLOUDINARY_UPLOAD_URL}
           listType="picture"
-          data={{
-            upload_preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
-          }}
-          beforeUpload={beforeUpload}
-          onChange={handleImagesChange}
-          defaultFileList={
-            product?.images.length
-              ? product.images.map((url, i) => {
-                  const parts = url.split('/')
-                  const name = parts[parts.length - 1]
-                  return {
-                    uid: i,
-                    url,
-                    name,
-                  }
-                })
-              : []
-          }
-          multiple
           accept="image/jpeg,image/png"
+          maxCount={10}
+          multiple
+          beforeUpload={beforeUpload}
+          fileList={images}
+          onChange={handleImagesChange}
         >
           <Button block icon={<UploadOutlined />}>
             Upload
@@ -214,8 +243,8 @@ const ProductForm = ({ onFinish, isPending, product }) => {
       </Item>
 
       <Item>
-        <Button type="primary" htmlType="submit">
-          Submit
+        <Button type="primary" htmlType="submit" loading={isPending}>
+          {!isPending && 'Submit'}
         </Button>
       </Item>
     </Form>

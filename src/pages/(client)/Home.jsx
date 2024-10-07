@@ -6,7 +6,7 @@ import useProduct from '../../hooks/useProduct'
 
 const Home = () => {
   const {
-    getAllProductsQuery: { data, isLoading, isError, error },
+    getProductsQuery: { data, isLoading, isError, error },
   } = useProduct()
 
   useEffect(() => {

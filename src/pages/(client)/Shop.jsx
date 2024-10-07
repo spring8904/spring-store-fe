@@ -13,7 +13,7 @@ import {
 
 const Shop = () => {
   const {
-    getAllProductsQuery: { data, isLoading, isError, error },
+    getProductsQuery: { data, isLoading, isError, error },
   } = useProduct()
 
   useEffect(() => {

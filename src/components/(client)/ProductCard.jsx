@@ -13,7 +13,7 @@ const ProductCard = ({ product }) => {
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="h-56 w-full">
-        <Link to={`/products/${product._id}`}>
+        <Link to={`/products/${product.slug}`}>
           <img className="mx-auto h-full" src={product.thumbnail} />
           <img
             className="mx-auto hidden h-full dark:block"
@@ -50,7 +50,7 @@ const ProductCard = ({ product }) => {
         </div>
 
         <Link
-          to={`/products/${product._id}`}
+          to={`/products/${product.slug}`}
           className="text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white"
         >
           {product.title}

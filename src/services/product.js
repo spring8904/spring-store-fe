@@ -1,9 +1,9 @@
 import instance from '../config/axiosConfig'
 
-export const getAllProducts = async () => await instance.get('/products')
+export const getProducts = async () => await instance.get('/products')
 
-export const getProductById = async (id) =>
-  await instance.get(`/products/${id}`)
+export const getProductBySlug = async (slug) =>
+  await instance.get(`/products/${slug}`)
 
 export const deleteProduct = async (id) =>
   await instance.delete(`/products/${id}`)

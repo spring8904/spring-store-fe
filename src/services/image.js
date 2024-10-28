@@ -1,6 +1,6 @@
-import instance from '../config/axiosConfig'
+import api from '../config/api'
 
 export const deleteImagesCloudinary = async (urls) => {
   if (!urls.length) return
-  return await instance.post(`/cloudinary/delete`, { urls })
+  return await api.post(`/cloudinary/delete`, { urls })
 }

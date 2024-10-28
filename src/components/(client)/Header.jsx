@@ -3,27 +3,41 @@ import {
   ShoppingCartOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { jwtDecode } from 'jwt-decode'
+import { Badge, message } from 'antd'
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import useAuthStore from '../../store/authStore'
+import useCartStore from '../../store/cartStore'
+import useAuth from '../../hooks/useAuth'
+import Loading from '../Loading'
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
-  const token = localStorage.getItem('token')
-  let isAdmin = false
-  const isLogin = !!token
 
-  if (token) {
-    const decodedToken = jwtDecode(token)
+  const { user, logout } = useAuthStore()
+  const { cart } = useCartStore()
 
-    if (decodedToken.role === 'admin') isAdmin = true
+  const { logoutMutation } = useAuth()
+  const { mutate, isPending } = logoutMutation
+
+  const isLogin = !!user?.email
+  const isAdmin = user?.role === 'admin'
+
+  const handleLogout = () => {
+    mutate(null, {
+      onSuccess: () => {
+        logout()
+        message.success('Logged out successfully')
+        localStorage.removeItem('token')
+        navigate('/login')
+      },
+    })
   }
 
-  const logout = () => {
-    localStorage.removeItem('token')
-    navigate('/login')
-  }
+  const cartCount = cart?.products?.length
+
+  if (isPending) return <Loading />
 
   return (
     <nav className="bg-white dark:bg-gray-800 antialiased">
@@ -67,7 +81,7 @@ const Header = () => {
               {isLogin ? (
                 <li className="shrink-0">
                   <button
-                    onClick={logout}
+                    onClick={handleLogout}
                     className="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
                   >
                     Logout
@@ -97,16 +111,19 @@ const Header = () => {
           </div>
 
           <div className="flex items-center lg:space-x-2">
-            <button
+            <Link
+              to="/cart"
               id="myCartDropdownButton1"
               data-dropdown-toggle="myCartDropdown1"
               type="button"
               className="inline-flex items-center rounded-lg justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium leading-none text-gray-900 dark:text-white"
             >
               <span className="sr-only">Cart</span>
-              <ShoppingCartOutlined className="text-lg me-1" />
+              <Badge size="small" count={cartCount}>
+                <ShoppingCartOutlined className="text-lg me-1" />
+              </Badge>
               <span className="hidden sm:flex">My Cart</span>
-            </button>
+            </Link>
 
             <button
               id="userDropdownButton1"

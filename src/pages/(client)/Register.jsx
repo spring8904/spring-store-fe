@@ -53,11 +53,11 @@ const Register = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please input your email!',
+                    message: 'Email is required!',
                   },
                   {
                     type: 'email',
-                    message: 'Please enter a validate email!',
+                    message: 'Email must be a valid email!',
                   },
                 ]}
               >
@@ -70,7 +70,7 @@ const Register = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please input your password!',
+                    message: 'Password is required!',
                   },
                   {
                     min: 6,

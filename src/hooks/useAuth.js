@@ -1,21 +1,31 @@
-import { useMutation } from '@tanstack/react-query'
-import * as authServices from '../services/auth'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { getCurrentUser, login, logout, register } from '../services/auth'
 
 const useAuth = () => {
+  const token = localStorage.getItem('token')
+  const getCurrentUserQuery = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: getCurrentUser,
+    enabled: !!token,
+  })
+
   const loginMutation = useMutation({
-    mutationFn: async (values) => await authServices.login(values),
-    onSuccess: (res) => {
-      if (res.token) localStorage.setItem('token', res.token)
-    },
+    mutationFn: login,
   })
 
   const registerMutation = useMutation({
-    mutationFn: async (values) => await authServices.register(values),
+    mutationFn: register,
+  })
+
+  const logoutMutation = useMutation({
+    mutationFn: logout,
   })
 
   return {
+    getCurrentUserQuery,
     loginMutation,
     registerMutation,
+    logoutMutation,
   }
 }
 

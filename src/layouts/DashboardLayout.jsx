@@ -1,25 +1,21 @@
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
 import { Button, Layout } from 'antd'
-import { jwtDecode } from 'jwt-decode'
 import { useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import Navbar from '../components/(dashboard)/Navbar'
 import Sidebar from '../components/(dashboard)/Sidebar'
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
+import useAuthStore from '../store/authStore'
+import Loading from '../components/Loading'
 const { Header, Footer, Sider, Content } = Layout
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false)
+  const { user, isLoading } = useAuthStore()
 
-  const token = localStorage.getItem('token')
+  if (isLoading) return <Loading />
 
-  if (!token) return <Navigate to="/login" />
-
-  const decodedToken = jwtDecode(token)
-
-  if (decodedToken.exp < Math.floor(Date.now() / 1000))
-    return <Navigate to="/login" />
-
-  if (decodedToken.role !== 'admin') return <Navigate to="/" />
+  if (!user?.email) return <Navigate to="/login" />
+  if (user?.role !== 'admin') return <Navigate to="/" />
 
   return (
     <Layout className="min-h-screen">

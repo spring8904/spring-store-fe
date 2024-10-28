@@ -1,7 +1,8 @@
-import { Button, Checkbox, Flex, Form, Input, message } from 'antd'
+import { Button, Checkbox, Flex, Form, Input } from 'antd'
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
+import useAuthStore from '../../store/authStore'
 import { handleError } from '../../utils'
 const { Item } = Form
 const { Password } = Input
@@ -10,6 +11,8 @@ const Login = () => {
   useEffect(() => {
     document.title = 'Login'
   }, [])
+
+  const { setUser } = useAuthStore()
 
   const [form] = Form.useForm()
   const {
@@ -20,8 +23,9 @@ const Login = () => {
   const onFinish = (values) =>
     mutate(values, {
       onSuccess: (res) => {
-        message.success('Login successfully')
-        res.isAdmin ? navigate('/dashboard') : navigate('/')
+        setUser(res.user)
+        localStorage.setItem('token', res.token)
+        res.user?.role === 'admin' ? navigate('/dashboard') : navigate('/')
       },
       onError: handleError,
     })
@@ -50,16 +54,16 @@ const Login = () => {
               <Item
                 label="Your email:"
                 name="email"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please input your email!',
-                  },
-                  {
-                    type: 'email',
-                    message: 'Please enter a validate email!',
-                  },
-                ]}
+                // rules={[
+                //   {
+                //     required: true,
+                //     message: 'Email is required!',
+                //   },
+                //   {
+                //     type: 'email',
+                //     message: 'Email must be a valid email!',
+                //   },
+                // ]}
               >
                 <Input />
               </Item>
@@ -67,16 +71,16 @@ const Login = () => {
               <Item
                 label="Your password:"
                 name="password"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please input your password!',
-                  },
-                  {
-                    min: 6,
-                    message: 'Password must be at least 6 characters!',
-                  },
-                ]}
+                // rules={[
+                //   {
+                //     required: true,
+                //     message: 'Password is required!',
+                //   },
+                //   {
+                //     min: 6,
+                //     message: 'Password must be at least 6 characters!',
+                //   },
+                // ]}
               >
                 <Password />
               </Item>

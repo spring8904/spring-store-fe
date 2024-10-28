@@ -7,47 +7,43 @@ import {
   updateProduct,
 } from '../services/product'
 
+const PRODUCT_QUERY_KEY = 'products'
+
 const useProduct = (slug) => {
   const queryClient = useQueryClient()
 
   const getProductsQuery = useQuery({
-    queryKey: ['products'],
-    queryFn: async () => await getProducts(),
+    queryKey: [PRODUCT_QUERY_KEY],
+    queryFn: getProducts,
   })
 
   const getProductBySlugQuery = useQuery({
-    queryKey: ['product', slug],
-    queryFn: async () => await getProductBySlug(slug),
+    queryKey: [PRODUCT_QUERY_KEY, slug],
+    queryFn: () => getProductBySlug(slug),
     enabled: !!slug,
   })
 
-  const createProductMutation = useMutation({
-    mutationFn: async (product) => await createProduct(product),
+  const mutationOptions = {
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['products'],
+        queryKey: [PRODUCT_QUERY_KEY],
       })
     },
+  }
+
+  const createProductMutation = useMutation({
+    mutationFn: createProduct,
+    ...mutationOptions,
   })
 
   const updateProductMutation = useMutation({
-    mutationFn: async (formData) => {
-      const id = formData.get('id')
-      formData.delete('id')
-      return await updateProduct(id, formData)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['products'],
-      })
-    },
+    mutationFn: updateProduct,
+    ...mutationOptions,
   })
 
   const deleteProductMutation = useMutation({
-    mutationFn: async (id) => await deleteProduct(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries('products')
-    },
+    mutationFn: deleteProduct,
+    ...mutationOptions,
   })
 
   return {

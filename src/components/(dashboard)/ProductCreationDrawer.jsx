@@ -5,9 +5,8 @@ import { handleError } from '../../utils'
 import ProductForm from './ProductForm'
 
 const ProductCreationDrawer = ({ open, onClose }) => {
-  const {
-    createProductMutation: { mutate, isPending },
-  } = useProduct()
+  const { createProductMutation } = useProduct()
+  const { mutate, isPending } = createProductMutation
 
   const onFinish = useCallback(
     (values) => {

@@ -5,10 +5,23 @@ import {
   ShoppingCartOutlined,
   TruckOutlined,
 } from '@ant-design/icons'
-import { Rate } from 'antd'
+import { message, Rate } from 'antd'
 import { Link } from 'react-router-dom'
+import useCart from '../../hooks/useCart'
 
 const ProductCard = ({ product }) => {
+  const { addToCartMutation } = useCart()
+  const { mutate, isPending } = addToCartMutation
+
+  const handleAddToCart = (productId) =>
+    mutate(
+      { productId, quantity: 1 },
+      {
+        onSuccess: () => message.success('Added to cart'),
+        onError: (error) => message.error(error.message),
+      },
+    )
+
   const rate = Number((Math.random() * (5 - 1) + 1).toFixed(1))
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -91,8 +104,10 @@ const ProductCard = ({ product }) => {
           </p>
 
           <button
+            disabled={isPending}
             type="button"
             className="inline-flex items-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4  focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+            onClick={() => handleAddToCart(product._id)}
           >
             <ShoppingCartOutlined className="-ms-2 me-2 text-lg" />
             Add to cart

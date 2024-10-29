@@ -54,16 +54,16 @@ const Login = () => {
               <Item
                 label="Your email:"
                 name="email"
-                // rules={[
-                //   {
-                //     required: true,
-                //     message: 'Email is required!',
-                //   },
-                //   {
-                //     type: 'email',
-                //     message: 'Email must be a valid email!',
-                //   },
-                // ]}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Email is required!',
+                  },
+                  {
+                    type: 'email',
+                    message: 'Email must be a valid email!',
+                  },
+                ]}
               >
                 <Input />
               </Item>
@@ -71,16 +71,16 @@ const Login = () => {
               <Item
                 label="Your password:"
                 name="password"
-                // rules={[
-                //   {
-                //     required: true,
-                //     message: 'Password is required!',
-                //   },
-                //   {
-                //     min: 6,
-                //     message: 'Password must be at least 6 characters!',
-                //   },
-                // ]}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Password is required!',
+                  },
+                  {
+                    min: 6,
+                    message: 'Password must be at least 6 characters!',
+                  },
+                ]}
               >
                 <Password />
               </Item>

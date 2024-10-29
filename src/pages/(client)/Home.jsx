@@ -9,6 +9,8 @@ const Home = () => {
     getProductsQuery: { data, isLoading, isError, error },
   } = useProduct()
 
+  console.log(data)
+
   useEffect(() => {
     document.title = 'Home'
   }, [])
@@ -31,9 +33,12 @@ const Home = () => {
         )}
         <div className="mx-auto max-w-screen-xl px-4 2xl:px-0">
           <div className="mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4">
-            {data?.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
+            {data?.map(
+              (product) =>
+                product.status === 'published' && (
+                  <ProductCard key={product._id} product={product} />
+                ),
+            )}
             {isError && <p>Error: {error.message}</p>}
           </div>
         </div>

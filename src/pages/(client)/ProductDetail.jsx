@@ -6,10 +6,11 @@ import {
 } from '@ant-design/icons'
 import { Breadcrumb, Rate, Spin, Tabs } from 'antd'
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import useProduct from '../../hooks/useProduct'
 
 const ProductDetail = () => {
+  const navigate = useNavigate()
   const { slug } = useParams()
   const [product, setProduct] = useState({})
 
@@ -18,11 +19,11 @@ const ProductDetail = () => {
   } = useProduct(slug)
 
   useEffect(() => {
-    if (data) {
+    if (data && data.status === 'published') {
       setProduct(data)
       document.title = data.title
-    } else document.title = 'Product Detail'
-  }, [data])
+    } else navigate('/404')
+  }, [data, navigate])
 
   const tab = product.images?.length
     ? product.images?.map((img, index) => ({

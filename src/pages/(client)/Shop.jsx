@@ -1,8 +1,3 @@
-import { Breadcrumb, Spin } from 'antd'
-import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import ProductCard from '../../components/(client)/ProductCard'
-import useProduct from '../../hooks/useProduct'
 import {
   DownOutlined,
   FilterOutlined,
@@ -10,6 +5,11 @@ import {
   RightOutlined,
   SortAscendingOutlined,
 } from '@ant-design/icons'
+import { Breadcrumb, Spin } from 'antd'
+import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import ProductCard from '../../components/(client)/ProductCard'
+import useProduct from '../../hooks/useProduct'
 
 const Shop = () => {
   const {

@@ -1,3 +1,4 @@
+import { jwtDecode } from 'jwt-decode'
 import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Loading from './components/Loading'
@@ -31,7 +32,9 @@ const App = () => {
   }, [userLoading, setUserLoading])
 
   useEffect(() => {
-    setUser(user)
+    const token = localStorage.getItem('token')
+    const id = token ? jwtDecode(token).id : null
+    setUser({ ...user, id })
   }, [user, setUser])
 
   useEffect(() => {

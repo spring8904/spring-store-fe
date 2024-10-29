@@ -9,8 +9,6 @@ const Home = () => {
     getProductsQuery: { data, isLoading, isError, error },
   } = useProduct()
 
-  console.log(data)
-
   useEffect(() => {
     document.title = 'Home'
   }, [])

@@ -77,12 +77,11 @@ const ProductForm = ({ onFinish, isPending, product }) => {
     })
 
     if (thumbnail.length)
-      formData.append('thumbnailFile', thumbnail[0].originFileObj)
+      formData.append('thumbnail', thumbnail[0].originFileObj)
 
     if (images.length)
       images.forEach((image) => {
-        if (image.originFileObj)
-          formData.append('imagesFile', image.originFileObj)
+        if (image.originFileObj) formData.append('images', image.originFileObj)
 
         if (image.old) formData.append('oldImages', image.url)
       })

@@ -13,7 +13,7 @@ const useCart = () => {
   const queryClient = useQueryClient()
 
   const { user } = useAuthStore()
-  const userId = user?._id
+  const userId = user?.id
 
   const getCartQuery = useQuery({
     queryKey: [CART_QUERY_KEY, userId],

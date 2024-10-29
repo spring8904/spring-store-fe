@@ -1,4 +1,5 @@
 import { Button, Checkbox, Flex, Form, Input } from 'antd'
+import { jwtDecode } from 'jwt-decode'
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
@@ -23,7 +24,8 @@ const Login = () => {
   const onFinish = (values) =>
     mutate(values, {
       onSuccess: (res) => {
-        setUser(res.user)
+        const id = jwtDecode(res.token).id
+        setUser({ ...res.user, id })
         localStorage.setItem('token', res.token)
         res.user?.role === 'admin' ? navigate('/dashboard') : navigate('/')
       },

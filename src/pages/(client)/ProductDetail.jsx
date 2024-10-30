@@ -4,10 +4,12 @@ import {
   RightOutlined,
   ShoppingCartOutlined,
 } from '@ant-design/icons'
-import { Breadcrumb, Rate, Spin, Tabs } from 'antd'
+import { Breadcrumb, message, Spin, Tabs } from 'antd'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import useCart from '../../hooks/useCart'
 import useProduct from '../../hooks/useProduct'
+import { handleError } from '../../utils'
 
 const ProductDetail = () => {
   const navigate = useNavigate()
@@ -19,11 +21,24 @@ const ProductDetail = () => {
   } = useProduct(slug)
 
   useEffect(() => {
-    if (data && data.status === 'published') {
-      setProduct(data)
-      document.title = data.title
-    } else navigate('/404')
-  }, [data, navigate])
+    if (!isLoading)
+      if (data && data.status === 'published') {
+        setProduct(data)
+        document.title = data.title
+      } else navigate('/404')
+  }, [data, isLoading, navigate])
+
+  const { addToCartMutation } = useCart()
+  const { mutate, isPending } = addToCartMutation
+
+  const handleAddToCart = () =>
+    mutate(
+      { productId: product._id },
+      {
+        onSuccess: () => message.success('Added to cart'),
+        onError: handleError,
+      },
+    )
 
   const tab = product.images?.length
     ? product.images?.map((img, index) => ({
@@ -66,8 +81,6 @@ const ProductDetail = () => {
 
   if (isError) return <p>Error: {error.message}</p>
 
-  const rate = Number((Math.random() * (5 - 1) + 1).toFixed(1))
-
   return (
     <>
       <section className="pt-4 pb-8 bg-white md:pt-12 md:pb-16 dark:bg-gray-900 antialiased">
@@ -109,28 +122,17 @@ const ProductDetail = () => {
               <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
                 {product.title}
               </h1>
-              <div className="mt-4 sm:items-center sm:gap-4 sm:flex">
+              <div className="mt-4">
                 <p className="text-2xl font-extrabold text-gray-900 sm:text-3xl dark:text-white">
                   ${product.price}
                 </p>
 
-                <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                  <div className="flex items-center gap-1">
-                    <Rate allowHalf disabled value={rate} />
-                  </div>
-                  <p className="text-sm font-medium leading-none text-gray-500 dark:text-gray-400">
-                    ({rate})
-                  </p>
-                  <Link
-                    to="#"
-                    className="text-sm font-medium leading-none text-gray-900 underline hover:no-underline dark:text-white"
-                  >
-                    {Math.round(Math.random() * (1000 - 50)) + 50} Reviews
-                  </Link>
-                </div>
+                <p className="text-base text-gray-900 mt-2">
+                  Stock: {product.quantity}
+                </p>
               </div>
 
-              <div className="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
+              <div className="mt-3 sm:gap-4 sm:items-center sm:flex sm:mt-4">
                 <Link
                   to="#"
                   className="flex items-center justify-center py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
@@ -140,15 +142,14 @@ const ProductDetail = () => {
                   Add to favorites
                 </Link>
 
-                <Link
-                  to="#"
-                  title=""
+                <button
                   className="text-white mt-4 sm:mt-0 bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800 flex items-center justify-center"
-                  role="button"
+                  disabled={isPending}
+                  onClick={handleAddToCart}
                 >
                   <ShoppingCartOutlined className="text-lg -ms-2 me-2" />
                   Add to cart
-                </Link>
+                </button>
               </div>
 
               <hr className="my-6 md:my-8 border-gray-200 dark:border-gray-800" />

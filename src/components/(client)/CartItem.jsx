@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDebouncedCallback } from 'use-debounce'
 import useCart from '../../hooks/useCart'
+import { handleError } from '../../utils'
 const { confirm } = Modal
 
 const CartItem = ({ item }) => {
@@ -27,7 +28,7 @@ const CartItem = ({ item }) => {
 
   const handleIncrement = () => {
     if (quantity >= product.quantity) {
-      message.error('Maximum quantity reached')
+      message.error('Not enough stock')
       return
     }
 
@@ -48,9 +49,7 @@ const CartItem = ({ item }) => {
       onSuccess: () => {
         message.success('Removed from cart')
       },
-      onError: (error) => {
-        message.error(error.message)
-      },
+      onError: handleError,
     })
   }
 

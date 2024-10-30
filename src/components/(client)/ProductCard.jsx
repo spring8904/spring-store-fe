@@ -5,9 +5,10 @@ import {
   ShoppingCartOutlined,
   TruckOutlined,
 } from '@ant-design/icons'
-import { message, Rate } from 'antd'
+import { message } from 'antd'
 import { Link } from 'react-router-dom'
 import useCart from '../../hooks/useCart'
+import { handleError } from '../../utils'
 
 const ProductCard = ({ product }) => {
   const { addToCartMutation } = useCart()
@@ -15,14 +16,13 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = (productId) =>
     mutate(
-      { productId, quantity: 1 },
+      { productId },
       {
         onSuccess: () => message.success('Added to cart'),
-        onError: (error) => message.error(error.message),
+        onError: handleError,
       },
     )
 
-  const rate = Number((Math.random() * (5 - 1) + 1).toFixed(1))
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="h-56 w-full">
@@ -68,19 +68,6 @@ const ProductCard = ({ product }) => {
         >
           {product.title}
         </Link>
-
-        <div className="mt-2 flex items-center gap-2">
-          <div className="flex items-center">
-            <Rate className="text-base" allowHalf disabled value={rate} />
-          </div>
-
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
-            {rate}
-          </p>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            ({Math.round(Math.random() * (1000 - 50)) + 50})
-          </p>
-        </div>
 
         <ul className="mt-2 flex items-center gap-4">
           <li className="flex items-center gap-2">

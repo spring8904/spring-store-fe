@@ -30,8 +30,7 @@ const useCart = () => {
   }
 
   const addToCartMutation = useMutation({
-    mutationFn: async ({ productId, quantity }) =>
-      await addToCart(productId, quantity),
+    mutationFn: async ({ productId }) => await addToCart(productId),
     ...mutationOptions,
   })
 

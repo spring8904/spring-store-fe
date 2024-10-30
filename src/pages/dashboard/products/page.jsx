@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import ProductCreationDrawer from '../../components/(dashboard)/ProductCreationDrawer'
-import ProductTable from '../../components/(dashboard)/ProductTable'
-import ProductUpdateDrawer from '../../components/(dashboard)/ProductUpdateDrawer'
+import ProductCreationDrawer from './components/ProductCreationDrawer'
+import ProductTable from './components/ProductTable'
+import ProductUpdateDrawer from './components/ProductUpdateDrawer'
 
 const ProductManagement = () => {
   useEffect(() => {

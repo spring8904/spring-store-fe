@@ -2,9 +2,9 @@ import { Button, Checkbox, Flex, Form, Input } from 'antd'
 import { jwtDecode } from 'jwt-decode'
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import useAuth from '../../hooks/useAuth'
-import useAuthStore from '../../store/authStore'
-import { handleError } from '../../utils'
+import useAuth from '../../../hooks/useAuth'
+import useAuthStore from '../../../store/authStore'
+import { handleError } from '../../../utils'
 const { Item } = Form
 const { Password } = Input
 

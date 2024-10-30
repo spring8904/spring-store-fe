@@ -7,9 +7,9 @@ import {
 import { Breadcrumb, message, Spin, Tabs } from 'antd'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import useCart from '../../hooks/useCart'
-import useProduct from '../../hooks/useProduct'
-import { handleError } from '../../utils'
+import useCart from '../../../../hooks/useCart'
+import useProduct from '../../../../hooks/useProduct'
+import { handleError } from '../../../../utils'
 
 const ProductDetail = () => {
   const navigate = useNavigate()

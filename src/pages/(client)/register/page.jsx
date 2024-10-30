@@ -1,8 +1,8 @@
 import { Button, Checkbox, Form, Input, message } from 'antd'
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import useAuth from '../../hooks/useAuth'
-import { handleError } from '../../utils'
+import useAuth from '../../../hooks/useAuth'
+import { handleError } from '../../../utils'
 const { Password } = Input
 const { Item } = Form
 

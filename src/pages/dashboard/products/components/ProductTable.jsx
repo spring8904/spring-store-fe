@@ -17,9 +17,9 @@ import {
   Tag,
 } from 'antd'
 import { memo, useRef, useState } from 'react'
-import useProduct from '../../hooks/useProduct'
-import { handleError } from '../../utils'
 import Highlighter from 'react-highlight-words'
+import useProduct from '../../../../hooks/useProduct'
+import { handleError } from '../../../../utils'
 const { confirm } = Modal
 
 const ProductTable = ({ showCreationDrawer, showUpdateDrawer }) => {

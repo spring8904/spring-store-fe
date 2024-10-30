@@ -2,8 +2,8 @@ import { ArrowRightOutlined } from '@ant-design/icons'
 import { Empty } from 'antd'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import CartItem from '../../components/(client)/CartItem'
-import useCartStore from '../../store/cartStore'
+import useCartStore from '../../../store/cartStore'
+import CartItem from './components/CartItem'
 
 const Cart = () => {
   useEffect(() => {

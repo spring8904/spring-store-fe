@@ -7,8 +7,8 @@ import {
 } from '@ant-design/icons'
 import { message } from 'antd'
 import { Link } from 'react-router-dom'
-import useCart from '../../hooks/useCart'
-import { handleError } from '../../utils'
+import useCart from '../../../hooks/useCart'
+import { handleError } from '../../../utils'
 
 const ProductCard = ({ product }) => {
   const { addToCartMutation } = useCart()

@@ -13,7 +13,7 @@ import {
 } from 'antd'
 import deepEqual from 'deep-equal'
 import { memo, useEffect, useState } from 'react'
-import { beforeUpload, getPublicIdFromUrl } from '../../utils'
+import { beforeUpload, getPublicIdFromUrl } from '../../../../utils'
 const { Item } = Form
 const { TextArea } = Input
 

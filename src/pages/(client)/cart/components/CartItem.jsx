@@ -9,8 +9,8 @@ import { message, Modal, Skeleton } from 'antd'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDebouncedCallback } from 'use-debounce'
-import useCart from '../../hooks/useCart'
-import { handleError } from '../../utils'
+import useCart from '../../../../hooks/useCart'
+import { handleError } from '../../../../utils'
 const { confirm } = Modal
 
 const CartItem = ({ item }) => {

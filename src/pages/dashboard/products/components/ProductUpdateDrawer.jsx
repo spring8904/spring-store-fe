@@ -1,7 +1,7 @@
 import { Drawer, message } from 'antd'
 import { memo, useCallback } from 'react'
-import useProduct from '../../hooks/useProduct'
-import { handleError } from '../../utils'
+import useProduct from '../../../../hooks/useProduct'
+import { handleError } from '../../../../utils'
 import ProductForm from './ProductForm'
 
 const ProductUpdateDrawer = ({ open, onClose, product }) => {

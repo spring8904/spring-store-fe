@@ -8,8 +8,8 @@ import {
 import { Breadcrumb, Spin } from 'antd'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import ProductCard from '../../components/(client)/ProductCard'
-import useProduct from '../../hooks/useProduct'
+import useProduct from '../../../hooks/useProduct'
+import ProductCard from '../components/ProductCard'
 
 const Shop = () => {
   const {
@@ -75,9 +75,12 @@ const Shop = () => {
           </div>
         )}
         <div className="mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4">
-          {data?.map((product) => (
-            <ProductCard key={product._id} product={product} />
-          ))}
+          {data?.map(
+            (product) =>
+              product.status === 'published' && (
+                <ProductCard key={product._id} product={product} />
+              ),
+          )}
           {isError && <p>Error: {error.message}</p>}
         </div>
       </div>

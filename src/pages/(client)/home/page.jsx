@@ -1,8 +1,8 @@
 import { Spin } from 'antd'
 import { useEffect } from 'react'
-import HeroSection from '../../components/(client)/HeroSection'
-import ProductCard from '../../components/(client)/ProductCard'
-import useProduct from '../../hooks/useProduct'
+import useProduct from '../../../hooks/useProduct'
+import ProductCard from '../components/ProductCard'
+import HeroSection from './components/HeroSection'
 
 const Home = () => {
   const {
